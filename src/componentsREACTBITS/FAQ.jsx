@@ -6,7 +6,7 @@ const questions = [
     a: 'To zależy od pakietu, który wybierzesz. W wersji "Kopalnia Złota" masz dostęp 24/7 przez rok, a w "Kopalni Diamentów" – 24/7 na zawsze. W obu przypadkach możesz korzystać z kursu wtedy, kiedy chcesz, bez stresu i pośpiechu.',
   },
   {
-    q: 'Czy mogę się z Tobą skontaktować? (Przed zakupem tez??)',
+    q: 'Czy mogę się z Tobą skontaktować? (Przed zakupem też??)',
     a: 'Oczywiście! Niezależnie od tego, czy kupiłeś kurs, czy dopiero się zastanawiasz, możesz śmiało pisać. Instagram, Discord, mail – wszystko znajdziesz w zakładce Kontakt. Odpisuję zawsze, jak tylko mogę!',
   },
   {
