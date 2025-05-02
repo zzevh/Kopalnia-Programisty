@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-syne: Syne, "sans-serif";
+  --font-inter: Inter, "sans-serif";
+}
+
+body {
+  background-color: #141411;
+  min-height: 100vh;
+  color: #fff;
+}
+
+html {
+  background-color: #141411;
+}
+
+@keyframes scrollBanner {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.scrolling-banner {
+  animation: scrollBanner 20s linear infinite;
+  display: inline-flex;
+  white-space: nowrap;
+}
