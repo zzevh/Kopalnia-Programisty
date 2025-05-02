@@ -30,7 +30,7 @@ const App = () => {
           <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
             W „Kopalni Programisty” pokażę Ci krok po kroku, jak samodzielnie tworzyć własne projekty, wykorzystując sprawdzone narzędzia i strategie. Czekają na Ciebie konkretne przykłady, praktyczne wskazówki i wszystko bez zbędnego gadania.
           </p>
-          <a className="bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg cursor-pointer">
+          <a href='#kurs' className="bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg cursor-pointer">
             Wodzę do Kopalni
           </a>
           <div>
@@ -358,7 +358,7 @@ const App = () => {
           </div>
         </section>
 
-        <section className="max-w-7xl mx-auto px-6 mt-24 mb-24">
+        <section id='kurs' className="max-w-7xl mx-auto px-6 mt-24 mb-24">
           <div className="bg-[#34240F] rounded-2xl p-6 md:p-10 border-[#6b4a2d] border">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white font-syne mb-4 text-center">
               Wybierz kurs

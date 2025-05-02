@@ -12,10 +12,12 @@ body {
   background-color: #141411;
   min-height: 100vh;
   color: #fff;
+  scroll-behavior: smooth;
 }
 
 html {
   background-color: #141411;
+  scroll-behavior: smooth;
 }
 
 @keyframes scrollBanner {

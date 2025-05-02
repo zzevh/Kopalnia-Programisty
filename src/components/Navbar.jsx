@@ -31,7 +31,7 @@ const Navbar = () => {
 
         {/* CTA Button */}
         <a
-          href="#"
+          href="#kurs"
           className="hidden md:block bg-[#D5A44A] hover:bg-[#c69643] text-white font-semibold font-inter px-6 py-2 rounded-full transition-colors"
         >
           Wodzę do Kopalni
