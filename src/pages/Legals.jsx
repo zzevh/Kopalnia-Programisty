@@ -4,7 +4,7 @@ const REGULAMIN = (
   <>
     <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">REGULAMIN SERWISU KOPALNIA PROGRAMISTY</h2>
     <ol className="list-decimal pl-6 space-y-4">
-      <li>Właścicielem serwisu jest firma <strong>AureoTrade</strong> (jednoosobowa działalność gospodarcza). Kontakt: Discord, Instagram lub e-mail. NIP: 9491004152</li>
+      <li>Właścicielem serwisu jest firma <strong>AureoTrade</strong> (jednoosobowa działalność gospodarcza). Kontakt: Discord, Instagram lub e-mail. NIP: 9491004152 REGON: 541440220</li>
       <li>Oferta dotyczy sprzedaży produktów cyfrowych – kursów online, m.in. „Kopalnia Złota” i „Kopalnia Diamentów”.</li>
       <li>Zakup kursu oznacza dostęp do plików do pobrania. Warianty „na rok” i „na zawsze” oznaczają dostęp do linku do pobrania, nie do platformy online.</li>
       <li>Niektóre kursy zawierają dodatki: darmowe aktualizacje, mini-szkolenia, rabaty i kontakt bezpośredni – są to bonusy, a nie gwarantowane świadczenia.</li>

@@ -31,6 +31,12 @@ const Footer = () => {
               <li><a href="/legals" className="hover:text-white transition">Dodatkowe informacje</a></li>
             </ul>
           </div>
+          <div>
+            <div className="font-bold text-white mb-2 mt-8 md:mt-0">Kontakt</div>
+            <ul className="space-y-1 text-center md:text-left">
+              <li><a href="/kontakt" className="hover:text-white transition">Napisz do mnie</a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </footer>

@@ -112,11 +112,11 @@ const App = () => {
 
               <div className="bg-[#50402B] rounded-xl p-6 border border-[#FFE8BE]/20 relative">
                 <div className="absolute top-6 left-6 w-10 h-10 rounded-full bg-[#432A17] border border-[#FFDAAA]/40 flex items-center justify-center">
-                  <p>🛡️</p>
+                  <p>🚀</p>
                 </div>
                 <div className="pt-16 pb-4">
-                  <h3 className="text-xl font-semibold text-[#FFE8BE] mb-3 font-syne">Działasz legalnie i bezpiecznie</h3>
-                  <p className="text-[#9F9A92]">Wszystkie metody są zgodne z regulaminami itp itd. Więc nie ma banów, zwrotów i nieprzyjemności.</p>
+                  <h3 className="text-xl font-semibold text-[#FFE8BE] mb-3 font-syne">Wszystko przetestowane i działa</h3>
+                  <p className="text-[#9F9A92]">Korzystasz z wiedzy i narzędzi, które naprawdę robią robotę, bez zgadywania, bez błądzenia.</p>
                 </div>
               </div>
 
