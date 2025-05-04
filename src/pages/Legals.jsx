@@ -35,7 +35,7 @@ const POLITYKA = (
 
 const INFO = (
   <>
-    <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">INFORMACJE PRZED ZAKUPEM</h2>
+    <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">DODATKOWE INFORMACJE</h2>
     <ul className="list-disc pl-6 space-y-4">
       <li>Podpunkt „Wszystko co jest opisane powyżej na stronie” oznacza materiały przypisane do konkretnego kursu („Kopalnia Złota” lub „Diamentów”).</li>
       <li>Dostęp „na rok” lub „na zawsze” oznacza dostęp do linku do pobrania kursu. Nie obejmuje dostępu do platformy czy konta użytkownika.</li>
@@ -71,7 +71,7 @@ const Legals = () => {
             className={`px-6 py-2 rounded-lg font-bold text-lg transition ${active === 'info' ? 'bg-[#D19C4C] text-white' : 'bg-[#291F14] text-[#DFD2B9]'}`}
             onClick={() => setActive('info')}
           >
-            Informacje przed zakupem
+            Dodatkowe informacje
           </button>
         </div>
         <div className="bg-[#2E2112] rounded-2xl p-8 w-full shadow-lg border border-[#D19C4C] ">

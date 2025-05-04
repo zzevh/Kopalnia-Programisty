@@ -18,6 +18,27 @@ import r10 from './assets/opinie/10.png'
 
 
 const App = () => {
+  const [acceptGold, setAcceptGold] = useState(false);
+  const [acceptDiamond, setAcceptDiamond] = useState(false);
+  const [goldError, setGoldError] = useState(false);
+  const [diamondError, setDiamondError] = useState(false);
+
+  const handleGoldClick = (e) => {
+    if (!acceptGold) {
+      e.preventDefault();
+      setGoldError(true);
+      setTimeout(() => setGoldError(false), 3000);
+    }
+  };
+
+  const handleDiamondClick = (e) => {
+    if (!acceptDiamond) {
+      e.preventDefault();
+      setDiamondError(true);
+      setTimeout(() => setDiamondError(false), 3000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#141411] overflow-hidden">
       <main className="pb-12">
@@ -28,7 +49,7 @@ const App = () => {
             Kopalnia <br /> Programisty
           </h1>
           <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
-            W „Kopalni Programisty” pokażę Ci krok po kroku, jak samodzielnie tworzyć własne projekty, wykorzystując sprawdzone narzędzia i strategie. Czekają na Ciebie konkretne przykłady, praktyczne wskazówki i wszystko bez zbędnego gadania.
+            W "Kopalni Programisty" pokażę Ci krok po kroku, jak samodzielnie tworzyć własne projekty, wykorzystując sprawdzone narzędzia i strategie. Czekają na Ciebie konkretne przykłady, praktyczne wskazówki i wszystko bez zbędnego gadania.
           </p>
           <a href='#kurs' className="bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg cursor-pointer">
             Wodzę do Kopalni
@@ -418,7 +439,39 @@ const App = () => {
                 </div>
 
                 <div className="flex-1"></div>
-                <a href="#" className="w-full bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium py-3 rounded-full transition-colors text-lg block text-center mt-4">Kup Kopalnię Złota</a>
+                <div className="mt-auto">
+                  <a
+                    href="#"
+                    onClick={handleGoldClick}
+                    className={`w-full bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium py-3 rounded-full transition-colors text-lg block text-center mb-3 ${!acceptGold ? 'opacity-50' : ''}`}
+                  >
+                    Kup Kopalnię Złota
+                  </a>
+                  {goldError && (
+                    <div className="text-red-500 text-xs text-center font-medium mb-2 animate-pulse">
+                      Aby kontynuować, zaznacz poniższy checkbox.
+                    </div>
+                  )}
+                  <div className="flex items-start mt-3">
+                    <input
+                      type="checkbox"
+                      checked={acceptGold}
+                      onChange={e => {
+                        setAcceptGold(e.target.checked);
+                        if (e.target.checked) setGoldError(false);
+                      }}
+                      className="w-4 h-4 mr-2 accent-[#D5A44A] mt-1"
+                      id="acceptGold"
+                    />
+                    <label htmlFor="acceptGold" className="text-[#DFD2B9] text-xs leading-tight">
+                      Zapoznałem/am się i akceptuję
+                      <a href="/legals" className="inline-block mx-1 px-1 text-[#FFE8BE]">Regulamin</a>,
+                      <a href="/legals" className="inline-block mx-1 px-1 text-[#FFE8BE]">Politykę Prywatności</a> oraz
+                      <a href="/legals" className="inline-block mx-1 px-1 text-[#FFE8BE]">Dodatkowe informacje</a>.
+
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-[#1E64D1] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
@@ -477,7 +530,39 @@ const App = () => {
                 </div>
 
                 <div className="flex-1"></div>
-                <a href="#" className="w-full bg-white hover:bg-gray-100 text-[#1E64D1] font-medium py-3 rounded-full transition-colors text-lg block text-center mt-4">Kup Kopalnię Diamentów</a>
+                <div className="mt-auto">
+                  <a
+                    href="#"
+                    onClick={handleDiamondClick}
+                    className={`w-full bg-white hover:bg-gray-100 text-[#1E64D1] font-medium py-3 rounded-full transition-colors text-lg block text-center mb-3 ${!acceptDiamond ? 'opacity-50' : ''}`}
+                  >
+                    Kup Kopalnię Diamentów
+                  </a>
+                  {diamondError && (
+                    <div className="text-red-500 text-xs text-center font-medium mb-2 animate-pulse">
+                      Aby kontynuować, zaznacz poniższy checkbox.
+                    </div>
+                  )}
+                  <div className="flex items-start mt-3">
+                    <input
+                      type="checkbox"
+                      checked={acceptDiamond}
+                      onChange={e => {
+                        setAcceptDiamond(e.target.checked);
+                        if (e.target.checked) setDiamondError(false);
+                      }}
+                      className="w-4 h-4 mr-2 accent-[#1E64D1] mt-1"
+                      id="acceptDiamond"
+                    />
+                    <label htmlFor="acceptDiamond" className="text-white text-xs leading-tight">
+                      Zapoznałem/am się i akceptuję
+                      <a href="/legals" className="inline-block mx-1 px-1 text-white">Regulamin</a>,
+                      <a href="/legals" className="inline-block mx-1 px-1 text-white">Politykę Prywatności</a> oraz
+                      <a href="/legals" className="inline-block mx-1 px-1 text-white">Dodatkowe informacje</a>.
+
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
 
