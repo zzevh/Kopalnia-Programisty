@@ -12,14 +12,14 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Desktop Navigation */}
         <div className="hidden md:flex space-x-8">
-          <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+          <a href="#warto" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Dlaczego warto
           </a>
-          <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+          <a href="#przewaga" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Twoja przewaga
           </a>
-          <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
-            Zobacz kursy z porgramowania
+          <a href="/allproducts" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+            Zobacz kursy z programowania
           </a>
         </div>
         {/* Mobile Menu Button */}

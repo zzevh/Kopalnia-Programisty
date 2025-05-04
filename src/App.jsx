@@ -93,7 +93,7 @@ const App = () => {
           </div>
         </div>
 
-        <section className="max-w-7xl mx-auto px-6 mt-24 mb-24">
+        <section id="warto" className="max-w-7xl mx-auto px-6 mt-24 mb-24">
           <div className="bg-[#34240F] rounded-2xl p-10 relative">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white font-syne mb-12">
               Dlaczego warto?
@@ -163,7 +163,7 @@ const App = () => {
           </div>
         </section>
 
-        <section className="max-w-7xl mx-auto px-6 mt-24 mb-24">
+        <section id="przewaga" className="max-w-7xl mx-auto px-6 mt-24 mb-24">
           <div className="bg-[#34240F] rounded-2xl p-10 relative">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white font-syne mb-8">
               Twoja przewaga na starcie
