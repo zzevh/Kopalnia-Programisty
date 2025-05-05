@@ -1,54 +1,47 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/payment-notification",
-      "dest": "/api/payment-notification.js",
-      "methods": [
-        "GET",
-        "POST",
-        "OPTIONS"
-      ]
+      "source": "/api/payment-notification",
+      "destination": "/api/payment-notification.js"
     },
     {
-      "src": "/api/payment-callback",
-      "dest": "/api/payment-callback.js",
-      "methods": [
-        "GET",
-        "OPTIONS"
-      ]
+      "source": "/api/payment-callback",
+      "destination": "/api/payment-callback.js"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*)\\.js$",
-      "dest": "/$1.js",
-      "headers": {
-        "content-type": "application/javascript"
-      }
-    },
-    {
-      "src": "/(.*)\\.css$",
-      "dest": "/$1.css",
-      "headers": {
-        "content-type": "text/css"
-      }
-    },
-    {
-      "src": "/(.*\\.[a-zA-Z0-9]+)$",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.css",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/css"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
