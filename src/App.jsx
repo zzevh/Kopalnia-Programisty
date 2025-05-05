@@ -5,6 +5,7 @@ import stars from './assets/5star.png'
 import ShinyText from './componentsREACTBITS/ShinyText';
 import ScrollingBanner from './componentsREACTBITS/ScrollingBanner'
 import FAQ from './componentsREACTBITS/FAQ'
+import PaymentModal from './components/PaymentModal';
 
 import r3 from './assets/opinie/3.png'
 import r5 from './assets/opinie/5.jpg'
@@ -22,12 +23,27 @@ const App = () => {
   const [acceptDiamond, setAcceptDiamond] = useState(false);
   const [goldError, setGoldError] = useState(false);
   const [diamondError, setDiamondError] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productPrice, setProductPrice] = useState(null);
 
   const handleGoldClick = (e) => {
     if (!acceptGold) {
       e.preventDefault();
       setGoldError(true);
       setTimeout(() => setGoldError(false), 3000);
+    } else {
+      e.preventDefault();
+      setSelectedProduct('Kopalnia Złota');
+      setProductPrice('99');
+      setShowPaymentModal(true);
+
+      // Zapisz informacje o produkcie do localStorage
+      const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      localStorage.setItem(`product_${orderId}`, JSON.stringify({
+        name: 'Kopalnia Złota',
+        price: '99'
+      }));
     }
   };
 
@@ -36,7 +52,23 @@ const App = () => {
       e.preventDefault();
       setDiamondError(true);
       setTimeout(() => setDiamondError(false), 3000);
+    } else {
+      e.preventDefault();
+      setSelectedProduct('Kopalnia Diamentów');
+      setProductPrice('149');
+      setShowPaymentModal(true);
+
+      // Zapisz informacje o produkcie do localStorage
+      const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      localStorage.setItem(`product_${orderId}`, JSON.stringify({
+        name: 'Kopalnia Diamentów',
+        price: '149'
+      }));
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowPaymentModal(false);
   };
 
   return (
@@ -392,7 +424,7 @@ const App = () => {
 
               <div className="bg-[#50402B] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
                 <h3 className="text-2xl font-bold text-[#FFE8BE] font-syne mb-4 text-center">Kopalnia Złota</h3>
-                <div className="text-5xl font-extrabold text-[#FFE8BE] mb-6 font-syne text-center">129 <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
+                <div className="text-5xl font-extrabold text-[#FFE8BE] mb-6 font-syne text-center">99 <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-3">
@@ -476,7 +508,7 @@ const App = () => {
 
               <div className="bg-[#1E64D1] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
                 <h3 className="text-2xl font-bold text-white font-syne mb-4 text-center">Kopalnia Diamentów</h3>
-                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">249  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
+                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">149  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-3">
@@ -582,6 +614,14 @@ const App = () => {
           <FAQ />
         </section>
       </main>
+
+      {/* Modal płatności */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={handleCloseModal}
+        product={selectedProduct}
+        price={productPrice}
+      />
     </div>
   )
 }

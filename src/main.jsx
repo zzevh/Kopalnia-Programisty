@@ -8,6 +8,7 @@ import AllProducts from './allproducts.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Legals from './pages/Legals';
 import Kontakt from './pages/Kontakt';
+import PaymentCallback from './components/PaymentCallback';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/legals" element={<Legals />} />
         <Route path="/kontakt" element={<Kontakt />} />
         <Route path="/allproducts" element={<AllProducts />} />
+        <Route path="/payment/callback" element={<PaymentCallback />} />
       </Routes>
       <Footer />
     </BrowserRouter>
