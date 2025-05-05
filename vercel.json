@@ -3,15 +3,72 @@
   "routes": [
     {
       "src": "/api/payment-notification",
-      "dest": "/api/payment-notification.js"
+      "dest": "/api/payment-notification.js",
+      "methods": [
+        "GET",
+        "POST",
+        "OPTIONS"
+      ]
     },
     {
       "src": "/api/payment-callback",
-      "dest": "/api/payment-callback.js"
+      "dest": "/api/payment-callback.js",
+      "methods": [
+        "GET",
+        "OPTIONS"
+      ]
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)\\.js$",
+      "dest": "/$1.js",
+      "headers": {
+        "content-type": "application/javascript"
+      }
+    },
+    {
+      "src": "/(.*)\\.css$",
+      "dest": "/$1.css",
+      "headers": {
+        "content-type": "text/css"
+      }
+    },
+    {
+      "src": "/(.*\\.[a-zA-Z0-9]+)$",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+        }
+      ]
     }
   ]
 }
