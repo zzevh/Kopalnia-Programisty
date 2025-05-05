@@ -1,8 +1,17 @@
 {
-  "rewrites": [
+  "version": 2,
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/api/payment-notification",
+      "dest": "/api/payment-notification.js"
+    },
+    {
+      "src": "/api/payment-callback",
+      "dest": "/api/payment-callback.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

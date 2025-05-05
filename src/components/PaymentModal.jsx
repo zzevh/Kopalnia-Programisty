@@ -56,16 +56,17 @@ const PaymentModal = ({ isOpen, onClose, product, price }) => {
       };
 
       // Generowanie danych formularza
-      const formData = paymentService.generatePaymentFormData(paymentData);
+      const paymentFormData = paymentService.generatePaymentFormData(paymentData);
 
-      // Tworzenie i wysyłanie formularza
+      // Lepsze podejście - tworzymy formularz HTML i wysyłamy go
+      // HotPay najlepiej obsługuje standardowy formularz POST
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = 'https://platnosc.hotpay.pl/';
+      form.action = 'https://platnosc.hotpay.pl';
       form.style.display = 'none';
 
-      // Dodawanie pól do formularza
-      Object.entries(formData).forEach(([key, value]) => {
+      // Dodajemy wszystkie parametry jako pola formularza
+      Object.entries(paymentFormData).forEach(([key, value]) => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = key;
@@ -73,7 +74,7 @@ const PaymentModal = ({ isOpen, onClose, product, price }) => {
         form.appendChild(input);
       });
 
-      // Dodanie formularza do dokumentu i wysłanie
+      // Dodajemy formularz do dokumentu i wysyłamy
       document.body.appendChild(form);
       form.submit();
     } catch (error) {
