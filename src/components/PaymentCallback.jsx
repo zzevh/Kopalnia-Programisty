@@ -23,12 +23,42 @@ const PaymentCallback = () => {
         const orderId = searchParams.get('ID_ZAMOWIENIA');
         const hash = searchParams.get('HASH');
         const secure = searchParams.get('SECURE');
+        const error = searchParams.get('error');
 
-        console.log('Parametry powrotu z płatności:', { status, orderId, hash, secure });
+        console.log('Parametry powrotu z płatności (PaymentCallback.jsx):', { status, orderId, hash, secure, error });
 
-        // Jeśli nie mamy statusu lub ID zamówienia, wystąpił błąd
-        if (!status || !orderId) {
-          setError('Brak wymaganych informacji o płatności');
+        // Obsługa błędu z endpointu callback
+        if (error) {
+          setError('Wystąpił błąd serwera podczas przetwarzania płatności. Prosimy o kontakt z obsługą klienta.');
+          setLoading(false);
+          return;
+        }
+
+        // Jeśli nie mamy parametrów, spróbujmy odzyskać dane sesji
+        if (!status && !orderId) {
+          // Spróbujmy odnaleźć ostatnią sesję płatności
+          const latestSession = findLatestPaymentSession();
+          if (latestSession) {
+            const { orderId: recoveredOrderId, product } = latestSession;
+
+            // Sprawdź czy transakcja została już zweryfikowana
+            const transaction = paymentService.getTransaction(recoveredOrderId);
+
+            if (transaction && transaction.status === 'SUCCESS') {
+              // Transakcja już została zweryfikowana, pokaż stronę pobierania
+              handleSuccessfulRecovery(recoveredOrderId, product);
+              return;
+            }
+
+            // Jeśli nie mamy transakcji, ale mamy dane o sesji,
+            // pokażmy komunikat o oczekiwaniu na weryfikację
+            setError('Twoja płatność jest przetwarzana. Jeśli została zakończona pomyślnie, za chwilę pojawi się link do pobrania. Jeśli tak się nie stanie, prosimy o kontakt z obsługą klienta.');
+            setLoading(false);
+            return;
+          }
+
+          // Jeśli nie mamy żadnych danych, pokażmy ogólny komunikat błędu
+          setError('Nie znaleziono danych płatności. Prosimy o kontakt z obsługą klienta lub spróbuj ponownie.');
           setLoading(false);
           return;
         }
@@ -60,7 +90,7 @@ const PaymentCallback = () => {
 
         // Obsługa różnych statusów płatności
         if (status === 'SUCCESS') {
-          handleSuccessfulPayment(orderId);
+          await handleSuccessfulPayment(orderId);
         } else if (status === 'FAILURE') {
           setError('Płatność zakończyła się niepowodzeniem. Spróbuj ponownie lub wybierz inną metodę płatności.');
           setLoading(false);
@@ -68,12 +98,82 @@ const PaymentCallback = () => {
           setError('Twoja płatność jest w trakcie przetwarzania. Otrzymasz powiadomienie e-mail o statusie płatności.');
           setLoading(false);
         } else {
-          setError(`Nieznany status płatności: ${status}`);
+          // W przypadku nieoczekiwanego statusu albo jego braku
+          setError(`Nieznany status płatności. Prosimy o kontakt z obsługą klienta.`);
           setLoading(false);
         }
       } catch (err) {
         console.error('Błąd podczas weryfikacji płatności:', err);
         setError('Wystąpił błąd podczas weryfikacji płatności. Prosimy o kontakt z obsługą klienta.');
+        setLoading(false);
+      }
+    }
+
+    // Funkcja do znajdowania ostatniej sesji płatności
+    function findLatestPaymentSession() {
+      try {
+        // Sprawdzamy w sessionStorage wszystkie klucze zaczynające się od "payment_"
+        let latestTimestamp = 0;
+        let latestSession = null;
+
+        // Przeglądamy wszystkie klucze w sessionStorage
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key.startsWith('payment_')) {
+            try {
+              const orderId = key.replace('payment_', '');
+              const encryptedData = sessionStorage.getItem(key);
+
+              // Próbujemy odszyfrować dane
+              const decryptedBytes = CryptoJS.AES.decrypt(
+                encryptedData,
+                config.hotpay.notificationPassword
+              );
+
+              const dataStr = decryptedBytes.toString(CryptoJS.enc.Utf8);
+              const data = JSON.parse(dataStr);
+
+              // Sprawdzamy czy to najnowsza sesja
+              if (data.timestamp > latestTimestamp) {
+                latestTimestamp = data.timestamp;
+                latestSession = {
+                  orderId,
+                  product: data.product,
+                  email: data.email,
+                  price: data.price,
+                  timestamp: data.timestamp
+                };
+              }
+            } catch (e) {
+              console.error('Błąd podczas odszyfrowywania sesji:', e);
+              // Ignorujemy błędne wpisy
+            }
+          }
+        }
+
+        return latestSession;
+      } catch (err) {
+        console.error('Błąd podczas szukania ostatniej sesji:', err);
+        return null;
+      }
+    }
+
+    // Funkcja pomocnicza do obsługi odzyskanej sesji
+    async function handleSuccessfulRecovery(orderId, product) {
+      try {
+        // Generuj link do pobrania
+        const downloadLink = await paymentService.generateDownloadLink(product);
+
+        setPaymentVerified(true);
+        setOrderData({
+          orderId,
+          product,
+          downloadLink
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error('Błąd podczas odzyskiwania sesji:', error);
+        setError('Wystąpił błąd podczas odzyskiwania informacji o płatności.');
         setLoading(false);
       }
     }
@@ -87,7 +187,7 @@ const PaymentCallback = () => {
         if (orderData) {
           const { product, email } = orderData;
 
-          // Zapisz transakcję
+          // Zapisz transakcję jako SUCCESS
           const transaction = await paymentService.saveTransaction({
             orderId,
             product,

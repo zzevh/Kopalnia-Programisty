@@ -49,6 +49,9 @@ class PaymentService {
     // Zapisujemy zaszyfrowane dane w sessionStorage
     sessionStorage.setItem(`payment_${orderId}`, encryptedData);
 
+    console.log('Generowanie danych formularza dla zamówienia:', orderId);
+    console.log('URL powrotu:', config.hotpay.returnUrl);
+
     // Dane formularza HotPay zgodnie z dokumentacją
     // https://dokumentacja.hotpay.pl/
     return {
@@ -58,11 +61,12 @@ class PaymentService {
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      ADRES_WWW: `${config.app.url}/payment/callback`,
+      ADRES_WWW: config.hotpay.returnUrl, // Adres URL API, który obsłuży przekierowanie
+      POWROT_OK: config.hotpay.returnUrl, // URL powrotu po sukcesie
+      POWROT_BLAD: config.hotpay.returnUrl, // URL powrotu po błędzie
+      POWROT: config.hotpay.returnUrl,     // Generalny URL powrotu
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
-      POWROT_OK: `${config.app.url}/payment/callback`, // URL powrotu po sukcesie
-      POWROT_BLAD: `${config.app.url}/payment/callback`, // URL powrotu po błędzie
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
     };
   }
