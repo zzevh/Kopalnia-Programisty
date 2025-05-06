@@ -9,11 +9,25 @@ export default function handler(req, res) {
     // Przekazujemy wszystkie parametry z pierwotnego żądania
     const searchParams = new URLSearchParams(req.query);
 
-    // Jeśli mamy ID_ZAMOWIENIA, ale nie mamy STATUS, dodajemy STATUS=SUCCESS 
-    // aby symulować sukces w trybie testowym
-    if (req.query.ID_ZAMOWIENIA && !req.query.STATUS) {
-      searchParams.set('STATUS', 'SUCCESS');
-      console.log('Dodano STATUS=SUCCESS dla trybu testowego');
+    // Jeśli mamy ID_ZAMOWIENIA z URL, ale nie mamy STATUS, sprawdzamy czy mamy testStatus
+    const orderId = req.query.ID_ZAMOWIENIA;
+    const status = req.query.STATUS;
+    const testStatus = req.query.testStatus;
+
+    // Dodajemy testStatus z adresu URL jeśli istnieje
+    if (!status && testStatus) {
+      console.log(`Wykryto testStatus=${testStatus} w adresie URL`);
+      // Status testowy już jest w parametrach, nie dodajemy nic
+    }
+    // Jeśli przekazano status=FAILURE, dodajemy testStatus=FAILURE
+    else if (status === 'FAILURE') {
+      searchParams.set('testStatus', 'FAILURE');
+      console.log('Dodano testStatus=FAILURE na podstawie status=FAILURE');
+    }
+    // Jeśli nie ma statusu ani testStatus, ale jest ID_ZAMOWIENIA
+    else if (!status && !testStatus && orderId) {
+      // Domyślnie nie dodajemy nic, obsługa po stronie React
+      console.log('Brak status i testStatus, React obsłuży odzyskiwanie sesji');
     }
 
     // Używamy stałego URL dla przekierowania

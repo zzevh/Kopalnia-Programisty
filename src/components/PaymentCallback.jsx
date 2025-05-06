@@ -24,12 +24,22 @@ const PaymentCallback = () => {
         const hash = searchParams.get('HASH');
         const secure = searchParams.get('SECURE');
         const error = searchParams.get('error');
+        const testStatus = searchParams.get('testStatus');
 
-        console.log('Parametry powrotu z płatności (PaymentCallback.jsx):', { status, orderId, hash, secure, error });
+        console.log('Parametry powrotu z płatności (PaymentCallback.jsx):', {
+          status, orderId, hash, secure, error, testStatus
+        });
 
         // Obsługa błędu z endpointu callback
         if (error) {
           setError('Wystąpił błąd serwera podczas przetwarzania płatności. Prosimy o kontakt z obsługą klienta.');
+          setLoading(false);
+          return;
+        }
+
+        // Jeśli mamy testStatus=FAILURE, obsługujemy to jako błąd płatności
+        if (testStatus === 'FAILURE') {
+          setError('Płatność została odrzucona. Prosimy spróbować ponownie lub wybrać inną metodę płatności.');
           setLoading(false);
           return;
         }
@@ -47,12 +57,34 @@ const PaymentCallback = () => {
 
           if (effectiveOrderId) {
             console.log('Odzyskano ostatnie ID zamówienia:', effectiveOrderId);
-            assumeSuccess = true; // Zakładamy, że to powrót po sukcesie
 
-            // W trybie testowym, gdy nie mamy statusu z HotPay, ale mamy ID zamówienia,
-            // zakładamy że płatność się powiodła (tylko w trybie testowym!)
-            if (!status) {
-              console.log('Brak statusu płatności, zakładam sukces (tryb testowy)');
+            // Nie zakładamy automatycznie sukcesu - sprawdzamy testStatus
+            if (testStatus === 'SUCCESS') {
+              assumeSuccess = true;
+              console.log('Status z URL: SUCCESS');
+            } else if (testStatus === 'FAILURE') {
+              setError('Płatność została odrzucona. Prosimy spróbować ponownie lub wybrać inną metodę płatności.');
+              setLoading(false);
+              return;
+            } else if (status === 'SUCCESS') {
+              assumeSuccess = true;
+              console.log('Status z HotPay: SUCCESS');
+            } else if (status === 'FAILURE') {
+              setError('Płatność została odrzucona. Prosimy spróbować ponownie lub wybrać inną metodę płatności.');
+              setLoading(false);
+              return;
+            } else {
+              // Bez określonego statusu, sprawdzamy czy transakcja już istnieje
+              const existingTransaction = paymentService.getTransaction(effectiveOrderId);
+              if (existingTransaction && existingTransaction.status === 'SUCCESS') {
+                assumeSuccess = true;
+                console.log('Znaleziono istniejącą transakcję z sukcesem');
+              } else {
+                console.log('Brak statusu płatności, czekam na notyfikację od HotPay');
+                setError('Twoja płatność jest przetwarzana. Jeśli została zakończona pomyślnie, za chwilę pojawi się link do pobrania. Jeśli tak się nie stanie, prosimy o kontakt z obsługą klienta.');
+                setLoading(false);
+                return;
+              }
             }
           } else {
             // Spróbujmy odnaleźć ostatnią sesję płatności
@@ -60,7 +92,26 @@ const PaymentCallback = () => {
             if (latestSession) {
               effectiveOrderId = latestSession.orderId;
               console.log('Odzyskano ID zamówienia z ostatniej sesji:', effectiveOrderId);
-              assumeSuccess = true; // Zakładamy, że to powrót po sukcesie
+
+              // Sprawdzamy status z URL lub HotPay
+              if (testStatus === 'SUCCESS') {
+                assumeSuccess = true;
+              } else if (testStatus === 'FAILURE') {
+                setError('Płatność została odrzucona. Prosimy spróbować ponownie lub wybrać inną metodę płatności.');
+                setLoading(false);
+                return;
+              } else if (status === 'SUCCESS') {
+                assumeSuccess = true;
+              } else if (status === 'FAILURE') {
+                setError('Płatność została odrzucona. Prosimy spróbować ponownie lub wybrać inną metodę płatności.');
+                setLoading(false);
+                return;
+              } else {
+                // Bez określonego statusu, wyświetlamy komunikat oczekiwania
+                setError('Twoja płatność jest przetwarzana. Jeśli została zakończona pomyślnie, za chwilę pojawi się link do pobrania. Jeśli tak się nie stanie, prosimy o kontakt z obsługą klienta.');
+                setLoading(false);
+                return;
+              }
             }
           }
 
@@ -96,11 +147,29 @@ const PaymentCallback = () => {
           return;
         }
 
-        // W trybie testowym, gdy wracamy bez statusu, ale mamy ID zamówienia, zakładamy sukces
-        const effectiveStatus = status || (assumeSuccess ? 'SUCCESS' : null);
+        // Teraz sprawdzamy efektywny status z uwzględnieniem testStatus
+        let effectiveStatus;
+
+        if (testStatus) {
+          // Jeśli mamy testStatus, to jest priorytetem
+          effectiveStatus = testStatus;
+          console.log('Używam testStatus:', testStatus);
+        } else if (status) {
+          // Jeśli nie mamy testStatus, ale mamy status z HotPay
+          effectiveStatus = status;
+          console.log('Używam status z HotPay:', status);
+        } else if (assumeSuccess) {
+          // Jeśli nie mamy żadnego statusu, ale mamy założenie sukcesu
+          effectiveStatus = 'SUCCESS';
+          console.log('Zakładam SUCCESS na podstawie wcześniejszych warunków');
+        } else {
+          // Brak jakiegokolwiek statusu
+          effectiveStatus = null;
+          console.log('Brak statusu płatności');
+        }
 
         // Obsługa różnych statusów płatności
-        if (effectiveStatus === 'SUCCESS' || assumeSuccess) {
+        if (effectiveStatus === 'SUCCESS') {
           await handleSuccessfulPayment(effectiveOrderId);
         } else if (effectiveStatus === 'FAILURE') {
           setError('Płatność zakończyła się niepowodzeniem. Spróbuj ponownie lub wybierz inną metodę płatności.');

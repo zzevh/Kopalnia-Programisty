@@ -110,13 +110,28 @@ export default function handler(req, res) {
     // Weryfikacja podpisu transakcji - pomijamy w trybie testowym
     if (!isTestMode && !verifySignature(notificationData)) {
       console.error('Nieprawidłowa sygnatura transakcji');
+      // W trybie produkcyjnym należy sprawdzać sygnaturę, ale dla testów akceptujemy
+      if (!isTestMode) {
+        console.log('UWAGA: W trybie produkcyjnym ten błąd powinien być traktowany poważnie!');
+      }
       // Zwracamy 200 OK zamiast błędu, aby HotPay nie ponawiał notyfikacji
       return res.status(200).json({ status: 'ERROR', message: 'Nieprawidłowa sygnatura' });
     }
 
     // Przetwarzanie notyfikacji
     const orderId = notificationData.ID_ZAMOWIENIA;
-    const status = notificationData.STATUS || 'SUCCESS'; // W trybie testowym, domyślnie SUCCESS
+
+    // Sprawdzamy testStatus, jeśli jest to ma pierwszeństwo nad STATUS
+    const testStatus = notificationData.testStatus;
+    let status;
+
+    if (testStatus) {
+      status = testStatus;
+      console.log(`Używam testStatus: ${testStatus} zamiast statusu HotPay`);
+    } else {
+      status = notificationData.STATUS || 'PENDING'; // Domyślnie PENDING, nie SUCCESS
+      console.log(`Używam statusu HotPay: ${status}`);
+    }
 
     // Zapisujemy transakcję - w rzeczywistej implementacji byłaby baza danych
     const success = createPaymentRecord(orderId, status);

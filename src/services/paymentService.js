@@ -55,8 +55,7 @@ class PaymentService {
     console.log('Generowanie danych formularza dla zamówienia:', orderId);
     console.log('URL powrotu:', config.hotpay.returnUrl);
 
-    // Dodajemy parametry do URL powrotu, aby HotPay przekazał ID zamówienia
-    // nawet jeśli samo nie doda parametrów (często zdarza się w trybie testowym)
+    // Dodajemy ID zamówienia do URL powrotu, aby HotPay przekazał je
     const returnUrl = `${config.hotpay.returnUrl}?ID_ZAMOWIENIA=${orderId}`;
 
     // Dane formularza HotPay zgodnie z dokumentacją
@@ -69,10 +68,10 @@ class PaymentService {
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
       ADRES_WWW: returnUrl, // Dodajemy ID zamówienia do adresu powrotu
-      POWROT_OK: returnUrl, // URL powrotu po sukcesie
-      POWROT_BLAD: returnUrl, // URL powrotu po błędzie
-      POWROT: returnUrl,      // Generalny URL powrotu
-      TYP_PLATNOSCI: "ALL",   // Wszystkie metody płatności
+      POWROT_OK: `${returnUrl}&testStatus=SUCCESS`, // URL po sukcesie (dodajemy testStatus dla trybu testowego)
+      POWROT_BLAD: `${returnUrl}&testStatus=FAILURE`, // URL po błędzie (dodajemy testStatus dla trybu testowego)
+      POWROT: returnUrl, // Generalny URL powrotu
+      TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
     };
