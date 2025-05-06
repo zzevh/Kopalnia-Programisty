@@ -41,8 +41,8 @@ class PaymentService {
       timestamp: Date.now()
     }));
 
-    // Aktualizacja: zgodnie z dokumentacją HotPay
-    // https://hotpay.pl/dokumentacja-api/
+    // Aktualizacja: używamy tylko ADRES_WWW jako głównego adresu powrotu
+    // HotPay przekieruje z powrotem na ten adres dodając parametry STATUS i HASH
     return {
       SEKRET: config.hotpay.secret,
       KWOTA: price,
@@ -50,9 +50,7 @@ class PaymentService {
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      PRZEKIEROWANIE_SUKCESS: `${config.app.url}/payment/callback?STATUS=SUCCESS&ID_ZAMOWIENIA=${orderId}`,
-      PRZEKIEROWANIE_BLAD: `${config.app.url}/payment/callback?STATUS=FAILURE&ID_ZAMOWIENIA=${orderId}`,
-      ADRES_WWW: config.hotpay.returnUrl,
+      ADRES_WWW: `${config.app.url}/payment/callback`,
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności

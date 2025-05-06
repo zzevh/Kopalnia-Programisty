@@ -18,10 +18,21 @@ const PaymentCallback = () => {
         // Pobieranie parametrów z URL
         const status = searchParams.get('STATUS');
         const orderId = searchParams.get('ID_ZAMOWIENIA');
+        const hash = searchParams.get('HASH'); // Dodane dla HotPay
 
-        // Jeśli nie mamy ID zamówienia, przekieruj na stronę główną
+        console.log('Parametry powrotu:', { status, orderId, hash });
+
+        // Jeśli nie mamy statusu, mogliśmy trafić na tę stronę przez przypadek
+        if (!status) {
+          setError('Brak informacji o statusie płatności');
+          setLoading(false);
+          return;
+        }
+
+        // Jeśli nie mamy ID zamówienia, mógł wystąpić błąd w komunikacji z HotPay
         if (!orderId) {
-          navigate('/', { replace: true });
+          setError('Brak identyfikatora zamówienia');
+          setLoading(false);
           return;
         }
 
@@ -86,17 +97,18 @@ const PaymentCallback = () => {
           setError('Płatność zakończyła się niepowodzeniem');
         } else {
           // Inny status
-          setError('Nieznany status płatności');
+          setError(`Nieznany status płatności: ${status}`);
         }
 
         setLoading(false);
       } catch (err) {
         console.error('Błąd podczas weryfikacji płatności:', err);
-        setError('Wystąpił błąd podczas weryfikacji płatności');
+        setError('Wystąpił błąd podczas weryfikacji płatności: ' + err.message);
         setLoading(false);
       }
     }
 
+    // Wykonaj weryfikację przy każdej zmianie parametrów URL
     verifyPayment();
   }, [searchParams, navigate]);
 
