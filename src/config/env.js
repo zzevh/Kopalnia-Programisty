@@ -1,13 +1,12 @@
-// Plik konfiguracyjny z prawdziwymi danymi
+// Plik konfiguracyjny z danymi produkcyjnymi
 
 export const config = {
   // HotPay - konfiguracja
   hotpay: {
     secret: "eTQrNllFZXFKYzVmeUZnUHlSeXpSUXg3WWU3L0RjR0Z6VG93VDR3Z0YwND0,", // Sekret z panelu HotPay
-    notificationPassword: "bMarioTradETayCaN4s$", // Ustaw to w panelu HotPay
-    notificationUrl: window.location.origin + "/api/payment-notification",
+    notificationPassword: "bMarioTradETayCaN4s$", // Hasło notyfikacji z panelu HotPay
+    notificationUrl: window.location.origin + "/api/payment-notification", // Zwróć uwagę na zmianę z "/api/payment/notification" na "/api/payment-notification"
     returnUrl: window.location.origin + "/payment/callback",
-    // Te adresy IP należą do HotPay - tylko one mogą wysyłać powiadomienia
     allowedIps: [
       "18.197.55.26",
       "3.126.108.86",
@@ -15,9 +14,7 @@ export const config = {
       "18.184.99.42",
       "3.72.152.155",
       "35.159.7.168"
-    ],
-    // Czy jesteśmy w trybie produkcyjnym (false = tryb testowy)
-    isProduction: false
+    ]
   },
 
   // Adres URL aplikacji

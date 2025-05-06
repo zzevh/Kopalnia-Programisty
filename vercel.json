@@ -10,10 +10,6 @@
       "destination": "/api/payment-callback.js"
     },
     {
-      "source": "/payment/callback",
-      "destination": "/index.html"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -55,14 +55,13 @@ const PaymentModal = ({ isOpen, onClose, product, price }) => {
         personName
       };
 
-      // Generowanie danych formularza
+      // Generowanie danych formularza z wykorzystaniem produkcyjnego serwisu płatności
       const paymentFormData = paymentService.generatePaymentFormData(paymentData);
 
-      // Lepsze podejście - tworzymy formularz HTML i wysyłamy go
-      // HotPay najlepiej obsługuje standardowy formularz POST
+      // Tworzenie i wysyłanie formularza
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = 'https://platnosc.hotpay.pl';
+      form.action = 'https://platnosc.hotpay.pl/';
       form.style.display = 'none';
 
       // Dodajemy wszystkie parametry jako pola formularza

@@ -1,9 +1,10 @@
 import { config } from '../config/env';
 import { generateSecureDownloadUrl } from '../utils/cloudinary';
 import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Klasa serwisu obsługującego płatności
+ * Klasa serwisu obsługującego płatności - wersja produkcyjna
  */
 class PaymentService {
   /**
@@ -11,9 +12,7 @@ class PaymentService {
    * @returns {string} - unikalny ID zamówienia
    */
   generateOrderId() {
-    const timestamp = Date.now();
-    const randomPart = Math.floor(Math.random() * 1000000);
-    return `order_${timestamp}_${randomPart}`;
+    return `KP_${Date.now()}_${uuidv4().substring(0, 8)}`;
   }
 
   /**
@@ -31,51 +30,41 @@ class PaymentService {
     // Generowanie ID zamówienia
     const orderId = this.generateOrderId();
 
-    // Zapisywanie informacji o produkcie (w rzeczywistości powinno być w bazie danych)
-    // To jest tylko tymczasowe rozwiązanie, docelowo w API
-    sessionStorage.setItem(`payment_${orderId}`, JSON.stringify({
+    // Szyfrowanie danych transakcji dla bezpieczeństwa
+    const orderData = {
       product,
       price,
       email,
       personName,
       timestamp: Date.now()
-    }));
+    };
 
-    // Adres powrotu do sklepu z parametrami sukcesu i błędu
-    const successUrl = `${config.app.url}/payment/callback?STATUS=SUCCESS&ID_ZAMOWIENIA=${orderId}`;
-    const failureUrl = `${config.app.url}/payment/callback?STATUS=FAILURE&ID_ZAMOWIENIA=${orderId}`;
+    // Zapisywanie zaszyfrowanych danych zamówienia
+    const orderDataStr = JSON.stringify(orderData);
+    const encryptedData = CryptoJS.AES.encrypt(
+      orderDataStr,
+      config.hotpay.notificationPassword
+    ).toString();
 
-    // Domyślny adres powrotu (używany, gdy brak przekierowania)
-    const returnUrl = `${config.app.url}/payment/callback`;
+    // Zapisujemy zaszyfrowane dane w sessionStorage
+    sessionStorage.setItem(`payment_${orderId}`, encryptedData);
 
-    // UWAGA:
-    // W trybie produkcyjnym HotPay automatycznie przekieruje po płatności
-    // W trybie testowym trzeba kliknąć "Powrót do sklepu" i NIE podaje parametrów
-
-    const formData = {
+    // Dane formularza HotPay zgodnie z dokumentacją
+    // https://dokumentacja.hotpay.pl/
+    return {
       SEKRET: config.hotpay.secret,
       KWOTA: price,
       NAZWA_USLUGI: product,
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      POWROT_WEBRIKI: returnUrl, // Używany przy ręcznym powrocie (przycisk "Powrót do sklepu")
+      ADRES_WWW: `${config.app.url}/payment/callback`,
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
+      POWROT_OK: `${config.app.url}/payment/callback`, // URL powrotu po sukcesie
+      POWROT_BLAD: `${config.app.url}/payment/callback`, // URL powrotu po błędzie
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
     };
-
-    // W trybie produkcyjnym dodajemy adresy przekierowań
-    if (config.hotpay.isProduction) {
-      formData.ADRES_WWW = returnUrl; // Główny adres powrotu
-      formData.PRZEKIEROWANIE_SUKCESS = successUrl; // Adres po sukcesie
-      formData.PRZEKIEROWANIE_BLAD = failureUrl; // Adres po błędzie
-    } else {
-      // W trybie testowym używamy tylko głównego adresu
-      formData.ADRES_WWW = returnUrl;
-    }
-
-    return formData;
   }
 
   /**
@@ -85,9 +74,6 @@ class PaymentService {
    */
   verifySignature(notification) {
     const { KWOTA, ID_PLATNOSCI, ID_ZAMOWIENIA, STATUS, SECURE, HASH, SEKRET } = notification;
-
-    // Weryfikacja IP (tylko dla API)
-    // if (!config.hotpay.allowedIps.includes(requestIp)) return false;
 
     // Generowanie oczekiwanego hasha
     const dataToHash = [
@@ -105,6 +91,31 @@ class PaymentService {
 
     // Porównanie z otrzymanym hashem
     return expectedHash === HASH;
+  }
+
+  /**
+   * Odszyfrowuje dane zamówienia
+   * @param {string} orderId - ID zamówienia
+   * @returns {Object|null} - dane zamówienia lub null jeśli nie znaleziono
+   */
+  getOrderData(orderId) {
+    try {
+      const encryptedData = sessionStorage.getItem(`payment_${orderId}`);
+      if (!encryptedData) return null;
+
+      // Odszyfrowanie danych
+      const decryptedBytes = CryptoJS.AES.decrypt(
+        encryptedData,
+        config.hotpay.notificationPassword
+      );
+
+      // Konwersja do tekstu, a następnie do obiektu
+      const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+      return JSON.parse(decryptedText);
+    } catch (error) {
+      console.error('Błąd podczas odszyfrowywania danych zamówienia:', error);
+      return null;
+    }
   }
 
   /**
@@ -128,7 +139,7 @@ class PaymentService {
         throw new Error('Nieznany produkt');
       }
 
-      // Generowanie bezpiecznego URL z Cloudinary
+      // Generowanie bezpiecznego URL
       const downloadUrl = generateSecureDownloadUrl(publicId, expiryTimeHours);
 
       return downloadUrl;
@@ -141,19 +152,16 @@ class PaymentService {
   /**
    * Zapisuje informację o transakcji
    * @param {Object} transactionData - dane transakcji
-   * @returns {Promise<void>}
+   * @returns {Promise<Object>} - zapisana transakcja
    */
   async saveTransaction(transactionData) {
-    // W rzeczywistej implementacji zapisujemy dane transakcji w bazie
-    // Tu używamy localStorage tylko dla demonstracji
-
     try {
       const { orderId, product, status, timestamp, email } = transactionData;
 
       // Generowanie unikalnego ID transakcji
-      const transactionId = `trans_${Date.now()}`;
+      const transactionId = `trans_${Date.now()}_${uuidv4().substring(0, 8)}`;
 
-      // Obiekt transakcji do zapisania
+      // Szyfrowanie danych transakcji dla dodatkowego bezpieczeństwa
       const transaction = {
         transactionId,
         orderId,
@@ -167,13 +175,23 @@ class PaymentService {
           : null
       };
 
+      // Szyfrowanie danych transakcji przed zapisaniem
+      const encryptedData = CryptoJS.AES.encrypt(
+        JSON.stringify(transaction),
+        config.hotpay.notificationPassword
+      ).toString();
+
       // Zapisywanie w localStorage (w produkcji używalibyśmy bazy danych)
-      localStorage.setItem(`transaction_${orderId}`, JSON.stringify(transaction));
+      localStorage.setItem(`transaction_${orderId}`, encryptedData);
 
       // Tworzenie indeksu dla łatwiejszego wyszukiwania transakcji po emailu
-      const userTransactions = JSON.parse(localStorage.getItem(`user_transactions_${email}`) || '[]');
-      userTransactions.push(orderId);
-      localStorage.setItem(`user_transactions_${email}`, JSON.stringify(userTransactions));
+      if (email) {
+        const userTransactions = JSON.parse(localStorage.getItem(`user_transactions_${email}`) || '[]');
+        if (!userTransactions.includes(orderId)) {
+          userTransactions.push(orderId);
+          localStorage.setItem(`user_transactions_${email}`, JSON.stringify(userTransactions));
+        }
+      }
 
       return transaction;
     } catch (error) {
@@ -189,8 +207,18 @@ class PaymentService {
    */
   getTransaction(orderId) {
     try {
-      const transactionData = localStorage.getItem(`transaction_${orderId}`);
-      return transactionData ? JSON.parse(transactionData) : null;
+      const encryptedData = localStorage.getItem(`transaction_${orderId}`);
+      if (!encryptedData) return null;
+
+      // Odszyfrowanie danych
+      const decryptedBytes = CryptoJS.AES.decrypt(
+        encryptedData,
+        config.hotpay.notificationPassword
+      );
+
+      // Konwersja do tekstu, a następnie do obiektu
+      const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+      return JSON.parse(decryptedText);
     } catch (error) {
       console.error('Błąd podczas pobierania transakcji:', error);
       return null;
