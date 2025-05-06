@@ -41,8 +41,8 @@ export const config = {
 
     // Ścieżki do plików w Cloudinary
     urls: {
-      goldMine: "kopalnia-programisty/kopalnia-zlota",
-      diamondMine: "kopalnia-programisty/kopalnia-diamentow"
+      goldMine: "kopalnia-programisty/kopalnia-zlota_l3a4vg",
+      diamondMine: "kopalnia-programisty/kopalnia-diamentow_b5zpb4"
     }
   }
 } 

@@ -492,29 +492,30 @@ export async function getDownloadUrl(productId) {
     if (!product) {
       console.error('Nieznany produkt:', productId);
 
-      // Awaryjny URL dla nieznanych produktów - w trybie produkcyjnym będzie zawsze działać
-      return 'https://res.cloudinary.com/kopalnia-programisty/raw/upload/v1/kopalnia-zlota.zip';
+      // Awaryjny URL dla nieznanych produktów
+      return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
     }
 
     // Spróbuj użyć Cloudinary do generowania URL
     try {
       const downloadUrl = generateSecureDownloadUrl(product.publicId, product.expiryHours);
-      console.log('Wygenerowano URL:', downloadUrl.substring(0, 50) + '...');
+      console.log('Wygenerowano URL:', downloadUrl);
       return downloadUrl;
     } catch (cloudinaryError) {
       console.error('Błąd podczas generowania URL Cloudinary:', cloudinaryError);
 
-      // Awaryjny statyczny URL, który zawsze działa
-      // W prawdziwej aplikacji użylibyśmy tutaj faktycznego URL z Cloudinary lub innego CDN
-      return productId === 'gold_mine'
-        ? 'https://res.cloudinary.com/kopalnia-programisty/raw/upload/v1/kopalnia-zlota.zip'
-        : 'https://res.cloudinary.com/kopalnia-programisty/raw/upload/v1/kopalnia-diamentow.zip';
+      // Awaryjny URL bazujący na ID produktu
+      if (productId === 'gold_mine') {
+        return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
+      } else {
+        return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-diamentow_b5zpb4.zip`;
+      }
     }
   } catch (error) {
     console.error('Błąd podczas generowania URL do pobrania:', error);
 
     // Awaryjny URL w przypadku błędu
-    return 'https://res.cloudinary.com/kopalnia-programisty/raw/upload/v1/kopalnia-zlota.zip';
+    return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
   }
 }
 

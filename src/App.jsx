@@ -55,14 +55,14 @@ const App = () => {
     } else {
       e.preventDefault();
       setSelectedProduct('Kopalnia Diamentów');
-      setProductPrice('149');
+      setProductPrice('1');
       setShowPaymentModal(true);
 
       // Zapisz informacje o produkcie do localStorage
       const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       localStorage.setItem(`product_${orderId}`, JSON.stringify({
         name: 'Kopalnia Diamentów',
-        price: '149'
+        price: '1'
       }));
     }
   };
@@ -508,7 +508,7 @@ const App = () => {
 
               <div className="bg-[#1E64D1] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
                 <h3 className="text-2xl font-bold text-white font-syne mb-4 text-center">Kopalnia Diamentów</h3>
-                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">149  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
+                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">1  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-3">

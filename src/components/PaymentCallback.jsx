@@ -131,19 +131,27 @@ export default function PaymentCallback() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
-        <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-xl w-full text-center border border-[#FFE8BE]/20">
+        <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center border border-[#FFE8BE]/20">
           <div className="w-20 h-20 mx-auto mb-6 text-green-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-[#FFE8BE] mb-4">Płatność zakończona sukcesem!</h1>
-          <p className="text-[#DFD2B9] mb-2">Dziękujemy za zakup <strong>{productName}</strong>.</p>
-          <p className="text-[#DFD2B9] mb-6">Numer zamówienia: <strong>{orderId}</strong></p>
+
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-[#FFE8BE] mb-4 font-syne">Płatność zakończona sukcesem!</h1>
+            <div className="h-1 w-24 bg-[#D5A44A] mx-auto mb-6"></div>
+            <p className="text-xl text-[#DFD2B9] mb-4">
+              Dziękujemy za zakup <strong className="text-[#FFE8BE]">{productName}</strong>.
+            </p>
+            <p className="text-sm text-[#DFD2B9] mb-6 opacity-80">
+              Numer zamówienia: <span className="font-mono">{orderId}</span>
+            </p>
+          </div>
 
           {downloadUrl ? (
-            <div className="mb-8">
-              <h3 className="text-xl font-medium text-[#FFE8BE] mb-4">Pobierz swój produkt:</h3>
+            <div className="bg-[#272420] rounded-xl p-6 mb-8 border border-[#FFE8BE]/10">
+              <h3 className="text-xl font-medium text-[#FFE8BE] mb-4 font-syne">Pobierz swój produkt:</h3>
               <a
                 href={downloadUrl}
                 className="inline-block bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-8 py-3 rounded-full transition-colors text-lg mb-4"
@@ -152,20 +160,38 @@ export default function PaymentCallback() {
               >
                 Pobierz teraz
               </a>
-              <p className="text-sm text-[#DFD2B9] opacity-80">
-                Link będzie aktywny przez 24 godziny. Zapisz go lub pobierz materiały od razu.
+              <p className="text-sm text-[#DFD2B9] opacity-80 mt-3">
+                {productName.includes('Złota')
+                  ? "Link będzie aktywny przez 24 godziny. Zapisz go lub pobierz materiały od razu."
+                  : "Link będzie aktywny bezterminowo. Zapisz go w bezpiecznym miejscu."}
               </p>
             </div>
           ) : (
-            <p className="text-[#DFD2B9] mb-6">Link do pobrania zostanie wygenerowany wkrótce...</p>
+            <div className="bg-[#272420] rounded-xl p-6 mb-8 border border-[#FFE8BE]/10">
+              <p className="text-[#DFD2B9] mb-2">Link do pobrania zostanie wygenerowany wkrótce...</p>
+              <div className="w-10 h-10 mx-auto mt-4 animate-spin">
+                <svg className="w-full h-full text-[#D5A44A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            </div>
           )}
 
-          <button
-            onClick={handleBackToStore}
-            className="inline-block bg-transparent border border-[#D5A44A] hover:bg-[#D5A44A]/10 text-[#D5A44A] font-medium px-6 py-2 rounded-full transition-colors text-base"
-          >
-            Wróć na stronę główną
-          </button>
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
+            <button
+              onClick={handleBackToStore}
+              className="inline-block bg-transparent border border-[#D5A44A] hover:bg-[#D5A44A]/10 text-[#D5A44A] font-medium px-6 py-2 rounded-full transition-colors text-base"
+            >
+              Wróć na stronę główną
+            </button>
+            <a
+              href="mailto:kontakt@kopalniaprogramisty.pl"
+              className="inline-block bg-transparent border border-[#9F9A92] hover:bg-[#9F9A92]/10 text-[#9F9A92] font-medium px-6 py-2 rounded-full transition-colors text-base"
+            >
+              Potrzebujesz pomocy?
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -174,22 +200,38 @@ export default function PaymentCallback() {
   // Stan błędu płatności
   return (
     <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
-      <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-xl w-full text-center border border-[#FFE8BE]/20">
+      <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center border border-[#FFE8BE]/20">
         <div className="w-20 h-20 mx-auto mb-6 text-red-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-[#FFE8BE] mb-4">Wystąpił problem z płatnością</h1>
-        <p className="text-[#DFD2B9] mb-4">{error || 'Nie udało się przetworzyć płatności. Spróbuj ponownie później.'}</p>
-        <p className="text-[#DFD2B9] mb-6">Numer zamówienia: <strong>{orderId || 'Brak'}</strong></p>
-        <button
-          onClick={handleBackToStore}
-          className="inline-block bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-8 py-3 rounded-full transition-colors text-lg mb-6"
-        >
-          Spróbuj ponownie
-        </button>
-        <div className="text-sm text-[#DFD2B9] opacity-80">
+
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-[#FFE8BE] mb-4 font-syne">Wystąpił problem z płatnością</h1>
+          <div className="h-1 w-24 bg-red-500 mx-auto mb-6"></div>
+          <p className="text-xl text-[#DFD2B9] mb-4">{error || 'Nie udało się przetworzyć płatności. Spróbuj ponownie później.'}</p>
+          <p className="text-sm text-[#DFD2B9] mb-6 opacity-80">
+            Numer zamówienia: <span className="font-mono">{orderId || 'Brak'}</span>
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4 justify-center">
+          <button
+            onClick={handleBackToStore}
+            className="inline-block bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-8 py-3 rounded-full transition-colors text-lg"
+          >
+            Spróbuj ponownie
+          </button>
+          <a
+            href="mailto:kontakt@kopalniaprogramisty.pl"
+            className="inline-block bg-transparent border border-[#D5A44A] hover:bg-[#D5A44A]/10 text-[#D5A44A] font-medium px-8 py-3 rounded-full transition-colors text-lg"
+          >
+            Kontakt z obsługą
+          </a>
+        </div>
+
+        <div className="text-sm text-[#DFD2B9] opacity-80 mt-8">
           <p>
             Jeśli problem występuje nadal, skontaktuj się z nami pod adresem{' '}
             <a href="mailto:kontakt@kopalniaprogramisty.pl" className="text-[#D5A44A] hover:underline">

@@ -14,34 +14,29 @@ export function generateSecureDownloadUrl(publicId, expiryTimeHours = 24) {
     // Obliczanie czasu wygaśnięcia (w sekundach od teraz)
     const expiresAt = Math.floor(Date.now() / 1000) + (expiryTimeHours * 3600);
 
-    // Tworzenie parametrów podpisanych URL
-    const parameters = {
-      public_id: publicId,
-      format: 'zip', // Zakładamy, że pliki są w formacie ZIP
-      expires_at: expiresAt,
-      attachment: true, // Wymusza pobieranie pliku zamiast wyświetlania
-      type: 'authenticated' // Użycie uwierzytelniania URL
-    };
+    // Przygotowanie właściwej ścieżki dla Cloudinary - usuwamy ewentualne prefiksy
+    const cleanPublicId = publicId.replace(/^kopalnia-programisty\//, '');
 
-    // Sortowanie parametrów w kolejności alfabetycznej
-    const sortedParameters = Object.keys(parameters)
-      .sort()
-      .map(key => `${key}=${parameters[key]}`)
-      .join('&');
-
-    // Generowanie podpisu
-    const signature = CryptoJS.SHA1(`${sortedParameters}${apiSecret}`).toString();
-
-    // Tworzenie pełnego adresu URL z podpisem
-    const secureUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/s--${signature}--/fl_attachment/${publicId}.zip`;
+    // Tworzenie bezpośredniego URL do pliku bez generowania skomplikowanych sygnatur
+    const directUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/${cleanPublicId}_l3a4vg.zip`;
 
     // Zapisanie czasu wygaśnięcia w localStorage dla późniejszej weryfikacji
     localStorage.setItem(`expiry_${publicId}`, expiresAt * 1000);
 
-    return secureUrl;
+    console.log('Wygenerowano bezpośredni URL do pobierania:', directUrl);
+    return directUrl;
   } catch (error) {
     console.error('Błąd podczas generowania bezpiecznego URL:', error);
-    throw new Error('Nie udało się wygenerować linku do pobrania pliku');
+
+    // W przypadku błędu, zwracamy awaryjny URL
+    const { cloudName } = config.cloudinary;
+    const cleanPublicId = publicId.replace(/^kopalnia-programisty\//, '');
+
+    if (cleanPublicId.includes('zlota')) {
+      return `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
+    } else {
+      return `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-diamentow_b5zpb4.zip`;
+    }
   }
 }
 
