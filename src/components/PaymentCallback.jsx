@@ -13,6 +13,11 @@ const PaymentCallback = () => {
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [orderData, setOrderData] = useState(null);
 
+  // Stan dla trybu testowego - widoczność wyboru statusu
+  const [showTestOptions, setShowTestOptions] = useState(false);
+  const [testOrderId, setTestOrderId] = useState(null);
+  const [testSessionData, setTestSessionData] = useState(null);
+
   useEffect(() => {
     async function verifyPayment() {
       try {
@@ -21,63 +26,15 @@ const PaymentCallback = () => {
         const orderId = searchParams.get('ID_ZAMOWIENIA');
         const hash = searchParams.get('HASH');
 
-        console.log('Parametry powrotu:', { status, orderId, hash, path: location.pathname });
+        // Specjalny parametr dla trybu testowego
+        const testMode = searchParams.get('TEST_MODE');
 
-        // Tryb testowy HotPay: w trybie testowym, gdy użytkownik kliknie "Powrót do sklepu",
-        // próbujemy znaleźć ostatnią transakcję w sessionStorage
-        if (!status && !orderId) {
-          // Sprawdź ostatnią sesję płatności
-          const sessionKeys = Object.keys(sessionStorage).filter(key => key.startsWith('payment_'));
+        console.log('Parametry powrotu:', { status, orderId, hash, path: location.pathname, testMode });
 
-          if (sessionKeys.length > 0) {
-            // Sortuj według czasu (najnowszy na górze)
-            sessionKeys.sort((a, b) => {
-              const timeA = JSON.parse(sessionStorage.getItem(a)).timestamp || 0;
-              const timeB = JSON.parse(sessionStorage.getItem(b)).timestamp || 0;
-              return timeB - timeA;
-            });
-
-            // Pobierz najnowszą sesję
-            const latestKey = sessionKeys[0];
-            const latestOrderId = latestKey.replace('payment_', '');
-            const sessionData = JSON.parse(sessionStorage.getItem(latestKey));
-
-            console.log('Znaleziono ostatnią sesję:', { latestOrderId, sessionData });
-
-            // Zasymuluj pomyślną płatność (tylko w trybie testowym / dev)
-            if (window.location.hostname === 'localhost' ||
-              window.location.hostname.includes('kopalnia-programisty')) {
-
-              // Zapisz transakcję jako udaną
-              await paymentService.saveTransaction({
-                orderId: latestOrderId,
-                product: sessionData.product,
-                status: 'SUCCESS',
-                email: sessionData.email
-              });
-
-              // Generuj link do pobrania
-              const downloadLink = await paymentService.generateDownloadLink(sessionData.product);
-              localStorage.setItem(`download_link_${latestOrderId}`, downloadLink);
-
-              setPaymentVerified(true);
-              setOrderData({
-                orderId: latestOrderId,
-                product: sessionData.product,
-                downloadLink
-              });
-              setLoading(false);
-              return;
-            }
-          }
-
-          setError('Brak informacji o płatności. Spróbuj ponownie lub skontaktuj się z obsługą.');
-          setLoading(false);
-          return;
-        }
-
-        // Standardowe przetwarzanie, gdy mamy parametry z URL
+        // Standardowe przetwarzanie - jeśli mamy parametry z URL
         if (status && orderId) {
+          console.log('Standardowe przetwarzanie z parametrami:', { status, orderId });
+
           // Sprawdzamy, czy mamy już informacje o transakcji
           const transaction = paymentService.getTransaction(orderId);
 
@@ -140,10 +97,48 @@ const PaymentCallback = () => {
             // Inny status
             setError(`Nieznany status płatności: ${status}`);
           }
-        } else {
-          setError('Brak wymaganych parametrów płatności');
+
+          setLoading(false);
+          return;
         }
 
+        // Tryb testowy HotPay - gdy przycisk "Powrót do sklepu" został kliknięty
+        // Bez parametrów URL, próbujemy znaleźć ostatnią transakcję i pokazujemy symulację wyboru
+        if (!status && !orderId) {
+          console.log('Tryb testowy - brak parametrów');
+
+          // Sprawdź ostatnią sesję płatności
+          const sessionKeys = Object.keys(sessionStorage).filter(key => key.startsWith('payment_'));
+
+          if (sessionKeys.length > 0) {
+            // Sortuj według czasu (najnowszy na górze)
+            sessionKeys.sort((a, b) => {
+              const timeA = JSON.parse(sessionStorage.getItem(a)).timestamp || 0;
+              const timeB = JSON.parse(sessionStorage.getItem(b)).timestamp || 0;
+              return timeB - timeA;
+            });
+
+            // Pobierz najnowszą sesję
+            const latestKey = sessionKeys[0];
+            const latestOrderId = latestKey.replace('payment_', '');
+            const sessionData = JSON.parse(sessionStorage.getItem(latestKey));
+
+            console.log('Znaleziono ostatnią sesję:', { latestOrderId, sessionData });
+
+            // Pokaż opcje testowe
+            setTestOrderId(latestOrderId);
+            setTestSessionData(sessionData);
+            setShowTestOptions(true);
+            setLoading(false);
+            return;
+          }
+
+          setError('Brak informacji o płatności. Spróbuj ponownie lub skontaktuj się z obsługą.');
+          setLoading(false);
+          return;
+        }
+
+        setError('Nieznany stan płatności. Spróbuj ponownie.');
         setLoading(false);
       } catch (err) {
         console.error('Błąd podczas weryfikacji płatności:', err);
@@ -155,6 +150,78 @@ const PaymentCallback = () => {
     // Wykonaj weryfikację przy każdej zmianie parametrów URL
     verifyPayment();
   }, [searchParams, navigate, location]);
+
+  // Funkcje obsługi trybu testowego
+  const handleTestSuccess = async () => {
+    try {
+      if (!testOrderId || !testSessionData) return;
+
+      // Zapisz transakcję jako udaną
+      await paymentService.saveTransaction({
+        orderId: testOrderId,
+        product: testSessionData.product,
+        status: 'SUCCESS',
+        email: testSessionData.email
+      });
+
+      // Generuj link do pobrania
+      const downloadLink = await paymentService.generateDownloadLink(testSessionData.product);
+      localStorage.setItem(`download_link_${testOrderId}`, downloadLink);
+
+      // Ustaw stan pomyślnej płatności
+      setPaymentVerified(true);
+      setOrderData({
+        orderId: testOrderId,
+        product: testSessionData.product,
+        downloadLink
+      });
+
+      // Ukryj opcje testowe
+      setShowTestOptions(false);
+    } catch (err) {
+      console.error('Błąd podczas symulacji sukcesu:', err);
+      setError('Wystąpił błąd podczas symulacji płatności: ' + err.message);
+    }
+  };
+
+  const handleTestFailure = () => {
+    setError('Płatność zakończyła się niepowodzeniem (tryb testowy)');
+    setShowTestOptions(false);
+  };
+
+  // Komponent wyboru statusu w trybie testowym
+  if (showTestOptions) {
+    return (
+      <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
+        <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-xl w-full text-center border border-[#FFE8BE]/20">
+          <h2 className="text-3xl font-bold text-[#FFE8BE] mb-6">Tryb testowy HotPay</h2>
+          <p className="text-[#DFD2B9] mb-8">
+            Wybierz status płatności do symulacji. W prawdziwym środowisku HotPay sam przekazałby status.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <button
+              onClick={handleTestSuccess}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-4 px-6 rounded-lg transition-colors"
+            >
+              Symuluj Sukces
+            </button>
+
+            <button
+              onClick={handleTestFailure}
+              className="bg-red-600 hover:bg-red-700 text-white font-medium py-4 px-6 rounded-lg transition-colors"
+            >
+              Symuluj Błąd
+            </button>
+          </div>
+
+          <div className="text-[#9F9A92] text-sm mt-4">
+            ID zamówienia: {testOrderId} | Produkt: {testSessionData?.product}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Komponent ładowania
   if (loading) {
@@ -207,10 +274,10 @@ const PaymentCallback = () => {
 
   // Nieoczekiwany stan - przekieruj na stronę główną
   useEffect(() => {
-    if (!loading && !paymentVerified && !error) {
+    if (!loading && !paymentVerified && !error && !showTestOptions) {
       navigate('/', { replace: true });
     }
-  }, [loading, paymentVerified, error, navigate]);
+  }, [loading, paymentVerified, error, showTestOptions, navigate]);
 
   return null;
 };

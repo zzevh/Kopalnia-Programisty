@@ -44,8 +44,15 @@ class PaymentService {
     // Adres powrotu do sklepu - ten sam co ADRES_WWW, ale ważny dla przycisku "Powrót do sklepu"
     const returnUrl = `${config.app.url}/payment/callback`;
 
-    // Aktualizacja: używamy tylko ADRES_WWW jako głównego adresu powrotu
-    // HotPay przekieruje z powrotem na ten adres dodając parametry STATUS i HASH
+    // UWAGA: W trybie testowym HotPay nie przekierowuje automatycznie do adresu ADRES_WWW
+    // z parametrami STATUS i ID_ZAMOWIENIA. Zamiast tego wyświetla JSON {"status":"SUCCESS"}
+    // i trzeba ręcznie kliknąć "Powrót do sklepu", co przekierowuje do adresu POWROT_WEBRIKI.
+    // 
+    // Nasza aplikacja obsługuje to zachowanie, pokazując ręczny wybór statusu (sukces/błąd)
+    // gdy przychodzi przekierowanie bez parametrów STATUS i ID_ZAMOWIENIA.
+    // 
+    // W środowisku produkcyjnym HotPay automatycznie przekieruje użytkownika
+    // do adresu ADRES_WWW z odpowiednimi parametrami.
     return {
       SEKRET: config.hotpay.secret,
       KWOTA: price,
