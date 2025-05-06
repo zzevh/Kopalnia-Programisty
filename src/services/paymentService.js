@@ -475,48 +475,41 @@ export async function getDownloadUrl(productId) {
 
     console.log('Generowanie URL pobrania dla produktu:', productId);
 
-    // Produkty i ich odpowiedniki w Cloudinary
-    const productMap = {
-      'gold_mine': {
-        publicId: config.downloads.urls.goldMine,
-        expiryHours: config.downloads.goldValidityHours
-      },
-      'diamond_mine': {
-        publicId: config.downloads.urls.diamondMine,
-        expiryHours: config.downloads.diamondValidityDays * 24
-      }
+    // Ścieżki do lokalnych plików ZIP zabezpieczonych hasłem
+    const LOCAL_FILES = {
+      'gold_mine': '/downloads/kopalnia-zlota.zip',
+      'diamond_mine': '/downloads/kopalnia-diamentow.zip',
     };
 
-    const product = productMap[productId];
-
-    if (!product) {
-      console.error('Nieznany produkt:', productId);
-
-      // Awaryjny URL dla nieznanych produktów
-      return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
+    // Zwracamy ścieżkę do lokalnego pliku
+    if (LOCAL_FILES[productId]) {
+      console.log('Użycie lokalnego pliku dla produktu:', productId);
+      return LOCAL_FILES[productId];
     }
 
-    // Spróbuj użyć Cloudinary do generowania URL
-    try {
-      const downloadUrl = generateSecureDownloadUrl(product.publicId, product.expiryHours);
-      console.log('Wygenerowano URL:', downloadUrl);
-      return downloadUrl;
-    } catch (cloudinaryError) {
-      console.error('Błąd podczas generowania URL Cloudinary:', cloudinaryError);
+    // Dla bezpieczeństwa, jeśli ID produktu nie jest zdefiniowane w naszych stałych linkach
+    const publicId = productId === 'gold_mine' ? 'kopalnia-zlota' : 'kopalnia-diamentow';
+    console.log('Generowanie URL z publicId:', publicId);
+    return generateSecureDownloadUrl(publicId);
 
-      // Awaryjny URL bazujący na ID produktu
-      if (productId === 'gold_mine') {
-        return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
-      } else {
-        return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-diamentow_b5zpb4.zip`;
-      }
-    }
   } catch (error) {
     console.error('Błąd podczas generowania URL do pobrania:', error);
 
-    // Awaryjny URL w przypadku błędu
-    return `https://res.cloudinary.com/${config.cloudinary.cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
+    // Awaryjne linki w przypadku błędu
+    return productId.includes('gold')
+      ? '/downloads/kopalnia-zlota.zip'
+      : '/downloads/kopalnia-diamentow.zip';
   }
+}
+
+/**
+ * Zwraca hasło do pliku ZIP dla danego produktu
+ * @param {string} productId - ID produktu
+ * @returns {string} - Hasło do pliku ZIP
+ */
+export function getFilePassword(productId) {
+  // Stałe hasło do wszystkich plików ZIP
+  return "KP_Tn4s";
 }
 
 export default paymentService; 

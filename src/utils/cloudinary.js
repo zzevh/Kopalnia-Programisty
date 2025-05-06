@@ -2,41 +2,37 @@ import { config } from '../config/env';
 import CryptoJS from 'crypto-js';
 
 /**
- * Generuje zabezpieczony link do pliku w Cloudinary z określonym czasem ważności
- * @param {string} publicId - publiczne ID pliku w Cloudinary
- * @param {number} expiryTimeHours - czas ważności linku w godzinach
- * @returns {string} - zabezpieczony URL do pobrania pliku
+ * Generuje link do lokalnego pliku ZIP zabezpieczonego hasłem
+ * @param {string} publicId - identyfikator pliku (używany do określenia typu kursu)
+ * @param {number} expiryTimeHours - czas ważności linku w godzinach (nieistotne dla lokalnych plików)
+ * @returns {string} - URL do pobrania pliku
  */
 export function generateSecureDownloadUrl(publicId, expiryTimeHours = 24) {
   try {
-    const { cloudName, apiSecret } = config.cloudinary;
+    // Lokalne ścieżki do plików ZIP zabezpieczonych hasłem
+    const LOCAL_FILES = {
+      "kopalnia-zlota": "/downloads/kopalnia-zlota.zip",
+      "kopalnia-diamentow": "/downloads/kopalnia-diamentow.zip",
+    };
 
-    // Obliczanie czasu wygaśnięcia (w sekundach od teraz)
-    const expiresAt = Math.floor(Date.now() / 1000) + (expiryTimeHours * 3600);
-
-    // Przygotowanie właściwej ścieżki dla Cloudinary - usuwamy ewentualne prefiksy
-    const cleanPublicId = publicId.replace(/^kopalnia-programisty\//, '');
-
-    // Tworzenie bezpośredniego URL do pliku bez generowania skomplikowanych sygnatur
-    const directUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/${cleanPublicId}_l3a4vg.zip`;
+    // Określenie typu kursu
+    const type = publicId.includes('zlota') ? 'kopalnia-zlota' : 'kopalnia-diamentow';
 
     // Zapisanie czasu wygaśnięcia w localStorage dla późniejszej weryfikacji
+    // (zachowujemy to dla kompatybilności z istniejącym kodem)
+    const expiresAt = Math.floor(Date.now() / 1000) + (expiryTimeHours * 3600);
     localStorage.setItem(`expiry_${publicId}`, expiresAt * 1000);
 
-    console.log('Wygenerowano bezpośredni URL do pobierania:', directUrl);
-    return directUrl;
+    // Zwrócenie ścieżki do lokalnego pliku
+    console.log(`Generowanie linku do lokalnego pliku: ${type}`);
+    return LOCAL_FILES[type];
   } catch (error) {
-    console.error('Błąd podczas generowania bezpiecznego URL:', error);
+    console.error('Błąd podczas generowania linku do pobrania:', error);
 
-    // W przypadku błędu, zwracamy awaryjny URL
-    const { cloudName } = config.cloudinary;
-    const cleanPublicId = publicId.replace(/^kopalnia-programisty\//, '');
-
-    if (cleanPublicId.includes('zlota')) {
-      return `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-zlota_l3a4vg.zip`;
-    } else {
-      return `https://res.cloudinary.com/${cloudName}/raw/upload/v1/kopalnia-programisty/kopalnia-diamentow_b5zpb4.zip`;
-    }
+    // Awaryjne linki
+    return publicId.includes('zlota')
+      ? "/downloads/kopalnia-zlota.zip"
+      : "/downloads/kopalnia-diamentow.zip";
   }
 }
 
@@ -96,9 +92,20 @@ export function generateUniqueToken() {
   return Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * Zwraca hasło do pliku ZIP dla danego produktu
+ * @param {string} productId - ID produktu (gold_mine lub diamond_mine)
+ * @returns {string} - Hasło do pliku ZIP
+ */
+export function getZipPassword(productId) {
+  // Stałe hasło do wszystkich plików ZIP zgodnie z wymaganiami
+  return "KP_Tn4s";
+}
+
 export default {
   generateSecureDownloadUrl,
   generateDownloadUrlSimple,
   isDownloadUrlValid,
-  generateUniqueToken
+  generateUniqueToken,
+  getZipPassword
 }; 

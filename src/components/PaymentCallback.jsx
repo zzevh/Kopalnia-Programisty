@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { getPaymentSession, clearPaymentSession, getDownloadUrl, updatePaymentStatus } from '../services/paymentService';
+import { getPaymentSession, clearPaymentSession, getDownloadUrl, updatePaymentStatus, getFilePassword } from '../services/paymentService';
 
 export default function PaymentCallback() {
   const navigate = useNavigate();
@@ -9,6 +9,7 @@ export default function PaymentCallback() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [downloadUrl, setDownloadUrl] = useState('');
+  const [filePassword, setFilePassword] = useState('');
   const [productName, setProductName] = useState('');
   const [orderId, setOrderId] = useState('');
   const [verifying, setVerifying] = useState(true);
@@ -65,6 +66,10 @@ export default function PaymentCallback() {
         // Generujemy URL do pobrania dla produktu
         const url = await getDownloadUrl(paymentSession.productId);
         setDownloadUrl(url);
+
+        // Pobieramy hasło do pliku ZIP
+        const password = getFilePassword(paymentSession.productId);
+        setFilePassword(password);
 
         setVerifying(false);
         setLoading(false);
@@ -160,11 +165,45 @@ export default function PaymentCallback() {
               >
                 Pobierz teraz
               </a>
-              <p className="text-sm text-[#DFD2B9] opacity-80 mt-3">
+
+              {filePassword && (
+                <div className="mt-6 p-5 bg-[#1A1814] rounded-lg border border-[#D5A44A]/30">
+                  <p className="text-[#FFE8BE] text-sm font-medium mb-2">Hasło do pliku ZIP:</p>
+                  <div className="flex items-center justify-center mt-2 mb-2">
+                    <div className="bg-[#23211E] py-2 px-6 rounded-lg border border-[#FFE8BE]/20">
+                      <span className="font-mono text-xl text-[#D5A44A] tracking-wide font-bold">{filePassword}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#DFD2B9] mt-2 opacity-80">
+                    Zapisz to hasło w bezpiecznym miejscu. Będzie ono potrzebne do otwarcia pobranego pliku.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 p-4 bg-[#1A1814] rounded-lg border border-[#FFE8BE]/10">
+                <p className="text-[#FFE8BE] text-sm font-medium mb-2">Instrukcja pobrania i otwarcia pliku:</p>
+                <ol className="text-sm text-[#DFD2B9] list-decimal pl-5 space-y-2">
+                  <li>Kliknij przycisk "Pobierz teraz" powyżej</li>
+                  <li>Zapisz plik ZIP na swoim urządzeniu</li>
+                  <li>Aby otworzyć plik, potrzebujesz programu obsługującego archiwa ZIP (np. WinRAR, 7-Zip, wbudowany w Windows/Mac)</li>
+                  <li>Podczas rozpakowywania pliku zostaniesz poproszony o podanie hasła</li>
+                  <li>Wprowadź podane powyżej hasło, aby uzyskać dostęp do materiałów kursu</li>
+                </ol>
+              </div>
+
+              <p className="text-sm text-[#DFD2B9] opacity-80 mt-4">
                 {productName.includes('Złota')
                   ? "Link będzie aktywny przez 24 godziny. Zapisz go lub pobierz materiały od razu."
                   : "Link będzie aktywny bezterminowo. Zapisz go w bezpiecznym miejscu."}
               </p>
+
+              <div className="mt-4 bg-[#342A1E] p-3 rounded-lg border border-[#D5A44A]/20">
+                <p className="text-xs text-[#DFD2B9] opacity-90">
+                  <span className="text-[#D5A44A] font-medium">Uwaga:</span> Jeśli masz problem z pobraniem,
+                  napisz do nas na <a href="mailto:kontakt@kopalniaprogramisty.pl" className="text-[#D5A44A] underline">kontakt@kopalniaprogramisty.pl</a>,
+                  a prześlemy Ci plik bezpośrednio.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="bg-[#272420] rounded-xl p-6 mb-8 border border-[#FFE8BE]/10">
