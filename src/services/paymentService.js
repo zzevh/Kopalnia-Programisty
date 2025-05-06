@@ -9,6 +9,9 @@ const ENCRYPTION_KEY = config.hotpay.notificationPassword;
 // Sesja płatności ma klucz oparty na ID zamówienia
 const PAYMENT_SESSION_PREFIX = 'payment_';
 
+// Stałe dla API HotPay
+const HOTPAY_API_URL = 'https://platnosc.hotpay.pl/';
+
 /**
  * Klasa serwisu obsługującego płatności - wersja produkcyjna
  */
@@ -61,7 +64,7 @@ class PaymentService {
       ENCRYPTION_KEY
     ).toString();
 
-    // Zapisujemy zaszyfrowane dane w sessionStorage
+    // Zapisujemy zaszyfrowane dane w localStorage
     localStorage.setItem(PAYMENT_SESSION_PREFIX + orderId, encryptedData);
 
     // Zapisujemy również ID ostatniego zamówienia, aby można było je odzyskać
@@ -83,8 +86,8 @@ class PaymentService {
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
       ADRES_WWW: returnUrl, // Dodajemy ID zamówienia do adresu powrotu
-      POWROT_OK: `${returnUrl}&testStatus=SUCCESS`, // URL po sukcesie (dodajemy testStatus dla trybu testowego)
-      POWROT_BLAD: `${returnUrl}&testStatus=FAILURE`, // URL po błędzie (dodajemy testStatus dla trybu testowego)
+      POWROT_OK: returnUrl, // URL po sukcesie
+      POWROT_BLAD: returnUrl, // URL po błędzie
       POWROT: returnUrl, // Generalny URL powrotu
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
@@ -271,6 +274,41 @@ class PaymentService {
       return false;
     }
   }
+
+  /**
+   * Sprawdza status płatności w HotPay
+   * UWAGA: Ta funkcja powinna być używana tylko po stronie serwera
+   * W praktyce, implementujemy ją po stronie serwera w API
+   * @param {string} orderId - ID zamówienia
+   * @returns {Promise<string>} - status płatności
+   */
+  async checkPaymentStatus(orderId) {
+    try {
+      // W produkcji, to zapytanie powinno być wykonane po stronie serwera
+      // Tutaj symulujemy odpowiedź
+      console.log(`Sprawdzanie statusu płatności dla ${orderId} - SYMULACJA`);
+
+      // W rzeczywistej implementacji, sprawdzamy status w bazie danych
+      // który został zaktualizowany przez notyfikację HotPay
+
+      // Dla celów testowych, zwracamy status z zapisanej transakcji
+      const transaction = this.getTransaction(orderId);
+      if (transaction) {
+        return transaction.status;
+      }
+
+      // Jeśli nie ma transakcji, sprawdzamy dane zamówienia
+      const orderData = this.getOrderData(orderId);
+      if (orderData) {
+        return orderData.status || 'PENDING';
+      }
+
+      return 'UNKNOWN';
+    } catch (error) {
+      console.error('Błąd podczas sprawdzania statusu płatności:', error);
+      return 'ERROR';
+    }
+  }
 }
 
 const paymentService = new PaymentService();
@@ -407,6 +445,14 @@ export function updatePaymentStatus(orderId, status) {
     ).toString();
 
     localStorage.setItem(key, updatedEncryptedData);
+
+    // Dodatkowo zapisujemy informację o transakcji
+    paymentService.saveTransaction({
+      orderId,
+      product: sessionData.productName,
+      status,
+      email: sessionData.email
+    });
 
     console.log(`Zaktualizowano status płatności dla ${orderId} na ${status}`);
     return true;

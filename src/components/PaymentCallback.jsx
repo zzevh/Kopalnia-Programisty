@@ -11,6 +11,7 @@ export default function PaymentCallback() {
   const [downloadUrl, setDownloadUrl] = useState('');
   const [productName, setProductName] = useState('');
   const [orderId, setOrderId] = useState('');
+  const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
     // Pobieramy parametry z URLa
@@ -23,11 +24,12 @@ export default function PaymentCallback() {
         // Pobieramy parametry z HotPay
         const hotpayStatus = searchParams.get('status');
         const hotpayOrderId = searchParams.get('orderId');
-        const testStatus = searchParams.get('testStatus');
         const hotpayError = searchParams.get('error');
 
-        // Jeśli mamy testStatus, używamy go zamiast statusu z HotPay
-        const status = testStatus || hotpayStatus;
+        // Jeśli jest błąd servera, obsługujemy go od razu
+        if (hotpayError) {
+          throw new Error('Wystąpił błąd podczas przetwarzania płatności: ' + hotpayError);
+        }
 
         // Pobieramy orderId albo z URL albo z sesji
         const currentOrderId = hotpayOrderId || '';
@@ -37,7 +39,7 @@ export default function PaymentCallback() {
         const paymentSession = getPaymentSession();
 
         if (!paymentSession) {
-          throw new Error('Nie znaleziono sesji płatności');
+          throw new Error('Nie znaleziono sesji płatności. Spróbuj ponownie lub skontaktuj się z obsługą klienta.');
         }
 
         console.log('Znaleziono sesję płatności:', paymentSession);
@@ -50,26 +52,49 @@ export default function PaymentCallback() {
         // Pobieramy nazwę produktu
         setProductName(paymentSession.productName || 'Twój produkt');
 
-        // Określamy status płatności
-        // W trybie testowym, przyjmujemy testStatus jako priorytet
-        let finalStatus;
-
-        if (testStatus) {
-          finalStatus = testStatus;
-          console.log(`Używam testStatus: ${testStatus}`);
-        } else if (status) {
-          finalStatus = status;
-          console.log(`Używam statusu z parametrów: ${status}`);
-        } else if (paymentSession.status) {
-          finalStatus = paymentSession.status;
-          console.log(`Używam statusu z sesji: ${paymentSession.status}`);
-        } else {
-          console.log('Brak statusu płatności');
-          throw new Error('Brak statusu płatności');
-        }
+        // W trybie produkcyjnym używamy statusu z HotPay
+        const finalStatus = hotpayStatus || 'PENDING';
+        console.log(`Status płatności: ${finalStatus}`);
 
         // Aktualizujemy status płatności
         updatePaymentStatus(paymentSession.orderId, finalStatus);
+
+        // Czekamy na potwierdzenie płatności przez HotPay
+        if (finalStatus === 'PENDING') {
+          // Ustawiamy timer aby sprawdzać status co 5 sekund przez maksymalnie 30 sekund
+          let attempts = 0;
+          const checkInterval = setInterval(async () => {
+            try {
+              attempts++;
+              console.log(`Sprawdzanie statusu płatności (próba ${attempts}/6)...`);
+
+              // W rzeczywistej implementacji sprawdzilibyśmy status w bazie danych
+              // Tutaj symulujemy sprawdzenie statusu
+              const updatedSession = getPaymentSession();
+              if (updatedSession && updatedSession.status === 'SUCCESS') {
+                clearInterval(checkInterval);
+
+                // Generujemy URL do pobrania dla produktu
+                const url = await getDownloadUrl(updatedSession.productId);
+                setDownloadUrl(url);
+                setSuccess(true);
+                setVerifying(false);
+              }
+
+              if (attempts >= 6) {
+                clearInterval(checkInterval);
+                setVerifying(false);
+                throw new Error('Czas oczekiwania na potwierdzenie płatności upłynął. Proszę odświeżyć stronę za kilka minut.');
+              }
+            } catch (err) {
+              clearInterval(checkInterval);
+              setVerifying(false);
+              setError(err.message);
+            }
+          }, 5000);
+
+          return;
+        }
 
         // Decydujemy o wyniku na podstawie statusu
         if (finalStatus === 'SUCCESS') {
@@ -78,9 +103,10 @@ export default function PaymentCallback() {
           // Generujemy URL do pobrania dla produktu
           const url = await getDownloadUrl(paymentSession.productId);
           setDownloadUrl(url);
+        } else if (finalStatus === 'FAILURE') {
+          throw new Error('Płatność została odrzucona. Spróbuj ponownie lub skontaktuj się z nami.');
         } else {
-          const errorMessage = hotpayError || 'Wystąpił problem z płatnością. Spróbuj ponownie lub skontaktuj się z nami.';
-          throw new Error(errorMessage);
+          throw new Error(`Otrzymano nieznany status płatności: ${finalStatus}`);
         }
 
       } catch (error) {
@@ -89,6 +115,7 @@ export default function PaymentCallback() {
         setSuccess(false);
       } finally {
         setLoading(false);
+        setVerifying(false);
       }
     };
 
@@ -101,6 +128,7 @@ export default function PaymentCallback() {
     navigate('/sklep');
   };
 
+  // Stan ładowania 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
@@ -116,6 +144,30 @@ export default function PaymentCallback() {
     );
   }
 
+  // Stan weryfikacji - oczekiwanie na potwierdzenie od serwera płatności
+  if (verifying) {
+    return (
+      <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
+        <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-xl w-full text-center border border-[#FFE8BE]/20">
+          <div className="w-16 h-16 mx-auto mb-6 animate-pulse">
+            <svg className="w-full h-full text-[#D5A44A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" stroke="currentColor" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-[#FFE8BE] mb-4">Weryfikacja płatności</h2>
+          <p className="text-[#DFD2B9] mb-4">
+            Czekamy na potwierdzenie płatności od operatora.
+            Zazwyczaj trwa to kilka sekund, ale może potrwać do minuty.
+          </p>
+          <p className="text-[#DFD2B9] text-sm opacity-75">
+            Nie odświeżaj strony. Zostaniesz automatycznie przekierowany po otrzymaniu potwierdzenia.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Stan sukcesu płatności
   if (success) {
     return (
       <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
@@ -159,6 +211,7 @@ export default function PaymentCallback() {
     );
   }
 
+  // Stan błędu płatności
   return (
     <div className="min-h-screen bg-[#141411] flex flex-col justify-center items-center px-4">
       <div className="bg-[#23211E] rounded-2xl shadow-lg p-8 max-w-xl w-full text-center border border-[#FFE8BE]/20">

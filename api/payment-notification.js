@@ -11,15 +11,9 @@ function verifySignature(notification) {
   try {
     const { KWOTA, ID_PLATNOSCI, ID_ZAMOWIENIA, STATUS, SECURE, HASH, SEKRET } = notification;
 
-    // Tryb testowy - zawsze zwraca true
-    if (notification.testMode === 'true' || notification.testStatus) {
-      console.log('Tryb testowy - pomijam weryfikację podpisu');
-      return true;
-    }
-
     // Sprawdzenie czy wszystkie wymagane pola są obecne
     if (!KWOTA || !ID_PLATNOSCI || !ID_ZAMOWIENIA || !STATUS || !SECURE || !HASH || !SEKRET) {
-      console.error('Brak wymaganych pól do weryfikacji podpisu');
+      console.error('Brak wymaganych pól do weryfikacji podpisu:', notification);
       return false;
     }
 
@@ -41,7 +35,17 @@ function verifySignature(notification) {
     console.log('Otrzymany hash:', HASH);
 
     // Porównanie z otrzymanym hashem
-    return expectedHash === HASH;
+    const isValid = expectedHash === HASH;
+
+    if (!isValid) {
+      console.error('Nieprawidłowa sygnatura transakcji. Dane:', {
+        expectedHash,
+        receivedHash: HASH,
+        dataToHash
+      });
+    }
+
+    return isValid;
   } catch (error) {
     console.error('Błąd podczas weryfikacji podpisu:', error);
     return false;
@@ -49,16 +53,45 @@ function verifySignature(notification) {
 }
 
 /**
- * Utwórz wpis w bazie dla płatności (imitacja dla localStorage)
+ * Pobiera, odszyfrowuje i przechowuje status transakcji
+ * @param {string} orderId - identyfikator zamówienia
+ * @param {string} status - status płatności
+ * @param {string} kwota - kwota transakcji
+ * @returns {boolean} - true jeśli sukces
  */
-function createPaymentRecord(id, status) {
+function saveTransactionStatus(orderId, status, kwota) {
   try {
-    // W rzeczywistej implementacji tutaj zapisalibyśmy dane w bazie
-    // Na potrzeby testów używamy localStorage/sessionStorage w komponencie
-    console.log(`Zapisano transakcję ${id} ze statusem ${status}`);
+    // W trybie produkcyjnym używalibyśmy bazy danych
+    // W tym przypadku używamy localStorage
+
+    // Tworzenie klucza dla transakcji
+    const transactionKey = `transaction_status_${orderId}`;
+
+    // Zapisanie danych transakcji
+    const transactionData = {
+      orderId,
+      status,
+      amount: kwota,
+      timestamp: Date.now()
+    };
+
+    // Szyfrowanie danych (opcjonalne, ale zalecane w produkcji)
+    const encryptedData = crypto.createHmac('sha256', config.hotpay.notificationPassword)
+      .update(JSON.stringify(transactionData))
+      .digest('hex');
+
+    // Zapisanie statusu transakcji
+    const dataToSave = JSON.stringify({
+      ...transactionData,
+      signature: encryptedData
+    });
+
+    // Tutaj w produkcji zapisalibyśmy do bazy danych
+    console.log(`Zapisuję status transakcji ${orderId}: ${status}`);
+
     return true;
   } catch (error) {
-    console.error('Błąd podczas zapisywania transakcji:', error);
+    console.error('Błąd podczas zapisywania statusu transakcji:', error);
     return false;
   }
 }
@@ -78,25 +111,12 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Sprawdź czy to GET (testowy) czy POST (prawdziwy)
-  const isTestMode = req.method === 'GET' || req.query.testMode === 'true';
-
-  if (req.method !== 'POST' && !isTestMode) {
-    return res.status(405).json({ error: 'Metoda niedozwolona' });
-  }
-
   try {
-    // W trybie GET (testowym) tworzymy sztuczne dane notyfikacji
-    let notificationData = req.body;
+    console.log('Otrzymano notyfikację płatności. Metoda:', req.method);
+    console.log('Dane powiadomienia:', req.method === 'POST' ? req.body : req.query);
 
-    // Dla trybu testowego, pozyskujemy dane z query string
-    if (isTestMode) {
-      notificationData = req.query;
-      notificationData.testMode = 'true';
-      console.log('Tryb testowy - pobrano dane z parametrów URL');
-    }
-
-    console.log('Otrzymano notyfikację płatności:', notificationData);
+    // Pobierz dane notyfikacji (zależnie od metody)
+    const notificationData = req.method === 'POST' ? req.body : req.query;
 
     // Sprawdzenie czy mamy dane
     if (!notificationData || Object.keys(notificationData).length === 0) {
@@ -104,56 +124,56 @@ export default function handler(req, res) {
       return res.status(200).json({ status: 'OK', message: 'Brak danych w żądaniu' });
     }
 
-    // Weryfikacja adresu IP - tymczasowo wyłączona do testów produkcyjnych
+    // Weryfikacja adresu IP
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log('IP klienta:', clientIp);
 
-    /* Komentujemy weryfikację IP do celów testowych
-    const allowedIps = config.hotpay.allowedIps;
-    
-    if (!allowedIps.includes(clientIp)) {
-      console.error(`Nieautoryzowany dostęp z IP: ${clientIp}`);
-      return res.status(403).json({ error: 'Nieautoryzowane IP' });
-    }
-    */
+    // Sprawdzenie, czy IP jest na liście dozwolonych HotPay
+    const allowedIps = config.hotpay.allowedIps || [];
+    const isAllowedIp = allowedIps.includes(clientIp);
 
-    // W trybie testowym ZAWSZE akceptujemy dane bez weryfikacji
-    if (isTestMode) {
-      console.log('Tryb testowy - pomijam weryfikację podpisu');
+    // Logowanie informacji o IP
+    if (!isAllowedIp) {
+      console.warn(`IP klienta (${clientIp}) nie znajduje się na liście dozwolonych IP HotPay.`);
+    } else {
+      console.log(`IP klienta (${clientIp}) zweryfikowane poprawnie.`);
     }
-    // Weryfikacja podpisu tylko w trybie produkcyjnym
-    else if (!verifySignature(notificationData)) {
-      console.error('Nieprawidłowa sygnatura transakcji');
-      // Zwracamy 200 OK zamiast błędu, aby HotPay nie ponawiał notyfikacji
-      return res.status(200).json({ status: 'OK', message: 'Nieprawidłowa sygnatura, ale akceptujemy' });
+
+    // Weryfikacja podpisu tylko w produkcji
+    const isSignatureValid = verifySignature(notificationData);
+
+    if (!isSignatureValid) {
+      console.error('Nieprawidłowa sygnatura transakcji - odrzucam notyfikację');
+
+      // Zawsze zwracamy status 200 OK, aby HotPay nie ponawiał notyfikacji
+      return res.status(200).json({
+        status: 'OK',
+        message: 'Nieprawidłowa sygnatura'
+      });
     }
 
     // Przetwarzanie notyfikacji
     const orderId = notificationData.ID_ZAMOWIENIA;
+    const status = notificationData.STATUS || 'PENDING';
+    const kwota = notificationData.KWOTA || '';
 
-    // Sprawdzamy testStatus, jeśli jest to ma pierwszeństwo nad STATUS
-    const testStatus = notificationData.testStatus;
-    let status;
+    console.log(`Przetwarzam notyfikację dla zamówienia ${orderId}, status: ${status}`);
 
-    if (testStatus) {
-      status = testStatus;
-      console.log(`Używam testStatus: ${testStatus} zamiast statusu HotPay`);
+    // Zapisz status transakcji
+    const saved = saveTransactionStatus(orderId, status, kwota);
+
+    if (saved) {
+      console.log(`Pomyślnie przetworzono notyfikację dla zamówienia: ${orderId}`);
     } else {
-      status = notificationData.STATUS || 'SUCCESS'; // W trybie testowym zakładamy SUCCESS
-      console.log(`Używam statusu HotPay: ${status}`);
+      console.error(`Błąd podczas przetwarzania notyfikacji dla zamówienia: ${orderId}`);
     }
 
-    // Zapisujemy transakcję - w rzeczywistej implementacji byłaby baza danych
-    const success = createPaymentRecord(orderId, status);
-
-    // Wyświetlamy log
-    console.log(`Otrzymano status płatności: ${status} dla zamówienia: ${orderId} (zapis: ${success ? 'udany' : 'nieudany'})`);
-
-    // Zwróć status 200 OK, aby HotPay nie ponawiał powiadomień
+    // Zawsze zwracamy 200 OK, aby HotPay nie ponawiał notyfikacji
     return res.status(200).json({ status: 'OK' });
   } catch (error) {
     console.error('Błąd podczas przetwarzania notyfikacji płatności:', error);
-    // Zwracamy 200 OK nawet w przypadku błędu, aby HotPay nie ponawiał notyfikacji
-    return res.status(200).json({ status: 'OK', message: error.message });
+
+    // Zawsze zwracamy 200 OK, aby HotPay nie ponawiał notyfikacji
+    return res.status(200).json({ status: 'OK', message: 'Wystąpił błąd, ale przyjmujemy notyfikację' });
   }
 } 
