@@ -49,8 +49,15 @@ class PaymentService {
     // Zapisujemy zaszyfrowane dane w sessionStorage
     sessionStorage.setItem(`payment_${orderId}`, encryptedData);
 
+    // Zapisujemy również ID ostatniego zamówienia, aby można było je odzyskać
+    sessionStorage.setItem('lastOrderId', orderId);
+
     console.log('Generowanie danych formularza dla zamówienia:', orderId);
     console.log('URL powrotu:', config.hotpay.returnUrl);
+
+    // Dodajemy parametry do URL powrotu, aby HotPay przekazał ID zamówienia
+    // nawet jeśli samo nie doda parametrów (często zdarza się w trybie testowym)
+    const returnUrl = `${config.hotpay.returnUrl}?ID_ZAMOWIENIA=${orderId}`;
 
     // Dane formularza HotPay zgodnie z dokumentacją
     // https://dokumentacja.hotpay.pl/
@@ -61,11 +68,11 @@ class PaymentService {
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      ADRES_WWW: config.hotpay.returnUrl, // Adres URL API, który obsłuży przekierowanie
-      POWROT_OK: config.hotpay.returnUrl, // URL powrotu po sukcesie
-      POWROT_BLAD: config.hotpay.returnUrl, // URL powrotu po błędzie
-      POWROT: config.hotpay.returnUrl,     // Generalny URL powrotu
-      TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
+      ADRES_WWW: returnUrl, // Dodajemy ID zamówienia do adresu powrotu
+      POWROT_OK: returnUrl, // URL powrotu po sukcesie
+      POWROT_BLAD: returnUrl, // URL powrotu po błędzie
+      POWROT: returnUrl,      // Generalny URL powrotu
+      TYP_PLATNOSCI: "ALL",   // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
     };

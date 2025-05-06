@@ -39,6 +39,21 @@ function verifySignature(notification) {
   }
 }
 
+/**
+ * Utwórz wpis w bazie dla płatności (imitacja dla localStorage)
+ */
+function createPaymentRecord(id, status) {
+  try {
+    // W rzeczywistej implementacji tutaj zapisalibyśmy dane w bazie
+    // Na potrzeby testów używamy localStorage/sessionStorage w komponencie
+    console.log(`Zapisano transakcję ${id} ze statusem ${status}`);
+    return true;
+  } catch (error) {
+    console.error('Błąd podczas zapisywania transakcji:', error);
+    return false;
+  }
+}
+
 export default function handler(req, res) {
   // Nagłówki CORS - ważne dla komunikacji między domenami
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -54,16 +69,26 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Sprawdź metodę HTTP
-  if (req.method !== 'POST') {
+  // Sprawdź czy to GET (testowy) czy POST (prawdziwy)
+  const isTestMode = req.method === 'GET';
+
+  if (req.method !== 'POST' && !isTestMode) {
     return res.status(405).json({ error: 'Metoda niedozwolona' });
   }
 
   try {
-    const notificationData = req.body;
+    // W trybie GET (testowym) tworzymy sztuczne dane notyfikacji
+    let notificationData = req.body;
+
+    // Dla trybu testowego, pozyskujemy dane z query string
+    if (isTestMode) {
+      notificationData = req.query;
+      console.log('Tryb testowy - pobrano dane z parametrów URL');
+    }
+
     console.log('Otrzymano notyfikację płatności:', notificationData);
 
-    // Sprawdzenie czy mamy dane w req.body
+    // Sprawdzenie czy mamy dane
     if (!notificationData || Object.keys(notificationData).length === 0) {
       console.error('Brak danych w żądaniu');
       return res.status(200).json({ status: 'ERROR', message: 'Brak danych w żądaniu' });
@@ -82,19 +107,22 @@ export default function handler(req, res) {
     }
     */
 
-    // Weryfikacja podpisu transakcji - tymczasowo pomijamy weryfikację do celów testowych
-    /* 
-    if (!verifySignature(notificationData)) {
+    // Weryfikacja podpisu transakcji - pomijamy w trybie testowym
+    if (!isTestMode && !verifySignature(notificationData)) {
       console.error('Nieprawidłowa sygnatura transakcji');
-      return res.status(400).json({ error: 'Nieprawidłowa sygnatura' });
+      // Zwracamy 200 OK zamiast błędu, aby HotPay nie ponawiał notyfikacji
+      return res.status(200).json({ status: 'ERROR', message: 'Nieprawidłowa sygnatura' });
     }
-    */
 
     // Przetwarzanie notyfikacji
-    const { ID_ZAMOWIENIA, STATUS } = notificationData;
+    const orderId = notificationData.ID_ZAMOWIENIA;
+    const status = notificationData.STATUS || 'SUCCESS'; // W trybie testowym, domyślnie SUCCESS
 
-    // Wyświetlamy log bez względu na to czy dane są poprawne czy nie
-    console.log(`Otrzymano status płatności: ${STATUS} dla zamówienia: ${ID_ZAMOWIENIA}`);
+    // Zapisujemy transakcję - w rzeczywistej implementacji byłaby baza danych
+    const success = createPaymentRecord(orderId, status);
+
+    // Wyświetlamy log
+    console.log(`Otrzymano status płatności: ${status} dla zamówienia: ${orderId} (zapis: ${success ? 'udany' : 'nieudany'})`);
 
     // Zwróć status 200 OK, aby HotPay nie ponawiał powiadomień
     return res.status(200).json({ status: 'OK' });
