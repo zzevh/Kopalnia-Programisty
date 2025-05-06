@@ -41,6 +41,9 @@ class PaymentService {
       timestamp: Date.now()
     }));
 
+    // Adres powrotu do sklepu - ten sam co ADRES_WWW, ale ważny dla przycisku "Powrót do sklepu"
+    const returnUrl = `${config.app.url}/payment/callback`;
+
     // Aktualizacja: używamy tylko ADRES_WWW jako głównego adresu powrotu
     // HotPay przekieruje z powrotem na ten adres dodając parametry STATUS i HASH
     return {
@@ -50,7 +53,8 @@ class PaymentService {
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      ADRES_WWW: `${config.app.url}/payment/callback`,
+      ADRES_WWW: returnUrl,
+      POWROT_WEBRIKI: returnUrl,  // Dodatkowy parametr dla przycisku "Powrót do sklepu"
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
