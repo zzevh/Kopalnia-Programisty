@@ -41,31 +41,41 @@ class PaymentService {
       timestamp: Date.now()
     }));
 
-    // Adres powrotu do sklepu - ten sam co ADRES_WWW, ale ważny dla przycisku "Powrót do sklepu"
+    // Adres powrotu do sklepu z parametrami sukcesu i błędu
+    const successUrl = `${config.app.url}/payment/callback?STATUS=SUCCESS&ID_ZAMOWIENIA=${orderId}`;
+    const failureUrl = `${config.app.url}/payment/callback?STATUS=FAILURE&ID_ZAMOWIENIA=${orderId}`;
+
+    // Domyślny adres powrotu (używany, gdy brak przekierowania)
     const returnUrl = `${config.app.url}/payment/callback`;
 
-    // UWAGA: W trybie testowym HotPay nie przekierowuje automatycznie do adresu ADRES_WWW
-    // z parametrami STATUS i ID_ZAMOWIENIA. Zamiast tego wyświetla JSON {"status":"SUCCESS"}
-    // i trzeba ręcznie kliknąć "Powrót do sklepu", co przekierowuje do adresu POWROT_WEBRIKI.
-    // 
-    // Nasza aplikacja obsługuje to zachowanie, pokazując ręczny wybór statusu (sukces/błąd)
-    // gdy przychodzi przekierowanie bez parametrów STATUS i ID_ZAMOWIENIA.
-    // 
-    // W środowisku produkcyjnym HotPay automatycznie przekieruje użytkownika
-    // do adresu ADRES_WWW z odpowiednimi parametrami.
-    return {
+    // UWAGA:
+    // W trybie produkcyjnym HotPay automatycznie przekieruje po płatności
+    // W trybie testowym trzeba kliknąć "Powrót do sklepu" i NIE podaje parametrów
+
+    const formData = {
       SEKRET: config.hotpay.secret,
       KWOTA: price,
       NAZWA_USLUGI: product,
       ID_ZAMOWIENIA: orderId,
       EMAIL: email,
       DANE_OSOBOWE: personName || 'Brak danych',
-      ADRES_WWW: returnUrl,
-      POWROT_WEBRIKI: returnUrl,  // Dodatkowy parametr dla przycisku "Powrót do sklepu"
+      POWROT_WEBRIKI: returnUrl, // Używany przy ręcznym powrocie (przycisk "Powrót do sklepu")
       TYP_PLATNOSCI: "ALL", // Wszystkie metody płatności
       OPIS_PLATNOSCI: `Zakup ${product}`,
       POBIERZ: "TRUE" // Parametr informujący o pobraniu płatności
     };
+
+    // W trybie produkcyjnym dodajemy adresy przekierowań
+    if (config.hotpay.isProduction) {
+      formData.ADRES_WWW = returnUrl; // Główny adres powrotu
+      formData.PRZEKIEROWANIE_SUKCESS = successUrl; // Adres po sukcesie
+      formData.PRZEKIEROWANIE_BLAD = failureUrl; // Adres po błędzie
+    } else {
+      // W trybie testowym używamy tylko głównego adresu
+      formData.ADRES_WWW = returnUrl;
+    }
+
+    return formData;
   }
 
   /**
