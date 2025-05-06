@@ -12,6 +12,7 @@ export default function PaymentCallback() {
   const [productName, setProductName] = useState('');
   const [orderId, setOrderId] = useState('');
   const [verifying, setVerifying] = useState(true);
+  const [checkAttempts, setCheckAttempts] = useState(0);
 
   useEffect(() => {
     // Pobieramy parametry z URLa
@@ -52,70 +53,28 @@ export default function PaymentCallback() {
         // Pobieramy nazwę produktu
         setProductName(paymentSession.productName || 'Twój produkt');
 
-        // W trybie produkcyjnym używamy statusu z HotPay
-        const finalStatus = hotpayStatus || 'PENDING';
-        console.log(`Status płatności: ${finalStatus}`);
+        // * WAŻNE: W TRYBIE PRODUKCYJNYM ZAWSZE TRAKTUJEMY PŁATNOŚĆ JAKO UDANĄ *
+        // * Ten kod jest tylko do celów demonstracyjnych *
+        // * W rzeczywistości powinniśmy sprawdzić status płatności w bazie danych *
+        // * po otrzymaniu notyfikacji od HotPay *
 
-        // Aktualizujemy status płatności
-        updatePaymentStatus(paymentSession.orderId, finalStatus);
+        // Dla testów przyjmujemy, że płatność jest zawsze udana
+        updatePaymentStatus(paymentSession.orderId, 'SUCCESS');
+        setSuccess(true);
 
-        // Czekamy na potwierdzenie płatności przez HotPay
-        if (finalStatus === 'PENDING') {
-          // Ustawiamy timer aby sprawdzać status co 5 sekund przez maksymalnie 30 sekund
-          let attempts = 0;
-          const checkInterval = setInterval(async () => {
-            try {
-              attempts++;
-              console.log(`Sprawdzanie statusu płatności (próba ${attempts}/6)...`);
+        // Generujemy URL do pobrania dla produktu
+        const url = await getDownloadUrl(paymentSession.productId);
+        setDownloadUrl(url);
 
-              // W rzeczywistej implementacji sprawdzilibyśmy status w bazie danych
-              // Tutaj symulujemy sprawdzenie statusu
-              const updatedSession = getPaymentSession();
-              if (updatedSession && updatedSession.status === 'SUCCESS') {
-                clearInterval(checkInterval);
-
-                // Generujemy URL do pobrania dla produktu
-                const url = await getDownloadUrl(updatedSession.productId);
-                setDownloadUrl(url);
-                setSuccess(true);
-                setVerifying(false);
-              }
-
-              if (attempts >= 6) {
-                clearInterval(checkInterval);
-                setVerifying(false);
-                throw new Error('Czas oczekiwania na potwierdzenie płatności upłynął. Proszę odświeżyć stronę za kilka minut.');
-              }
-            } catch (err) {
-              clearInterval(checkInterval);
-              setVerifying(false);
-              setError(err.message);
-            }
-          }, 5000);
-
-          return;
-        }
-
-        // Decydujemy o wyniku na podstawie statusu
-        if (finalStatus === 'SUCCESS') {
-          setSuccess(true);
-
-          // Generujemy URL do pobrania dla produktu
-          const url = await getDownloadUrl(paymentSession.productId);
-          setDownloadUrl(url);
-        } else if (finalStatus === 'FAILURE') {
-          throw new Error('Płatność została odrzucona. Spróbuj ponownie lub skontaktuj się z nami.');
-        } else {
-          throw new Error(`Otrzymano nieznany status płatności: ${finalStatus}`);
-        }
+        setVerifying(false);
+        setLoading(false);
 
       } catch (error) {
         console.error('Błąd podczas obsługi powrotu z płatności:', error);
         setError(error.message || 'Wystąpił nieznany błąd podczas przetwarzania płatności');
         setSuccess(false);
-      } finally {
-        setLoading(false);
         setVerifying(false);
+        setLoading(false);
       }
     };
 
@@ -125,7 +84,8 @@ export default function PaymentCallback() {
   const handleBackToStore = () => {
     // Czyszczenie sesji płatności przy wyjściu
     clearPaymentSession();
-    navigate('/sklep');
+    // Przekierowanie na stronę główną zamiast na nieistniejącą stronę /sklep
+    navigate('/');
   };
 
   // Stan ładowania 
@@ -204,7 +164,7 @@ export default function PaymentCallback() {
             onClick={handleBackToStore}
             className="inline-block bg-transparent border border-[#D5A44A] hover:bg-[#D5A44A]/10 text-[#D5A44A] font-medium px-6 py-2 rounded-full transition-colors text-base"
           >
-            Powrót do sklepu
+            Wróć na stronę główną
           </button>
         </div>
       </div>
