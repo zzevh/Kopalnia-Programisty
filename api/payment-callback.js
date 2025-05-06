@@ -7,27 +7,43 @@ export default function handler(req, res) {
     console.log('Parametry powrotu z HotPay (payment-callback.js):', req.query);
 
     // Przekazujemy wszystkie parametry z pierwotnego żądania
-    const searchParams = new URLSearchParams(req.query);
+    const searchParams = new URLSearchParams();
 
-    // Jeśli mamy ID_ZAMOWIENIA z URL, ale nie mamy STATUS, sprawdzamy czy mamy testStatus
+    // Wyodrębniamy potrzebne parametry
     const orderId = req.query.ID_ZAMOWIENIA;
     const status = req.query.STATUS;
+    const hash = req.query.HASH;
+    const secure = req.query.SECURE;
+    const error = req.query.error;
     const testStatus = req.query.testStatus;
 
+    // Dodajemy parametry w formacie, który zrozumie nasz komponent
+    if (orderId) searchParams.set('orderId', orderId);
+    if (status) searchParams.set('status', status);
+    if (hash) searchParams.set('hash', hash);
+    if (secure) searchParams.set('secure', secure);
+    if (error) searchParams.set('error', error);
+
     // Dodajemy testStatus z adresu URL jeśli istnieje
-    if (!status && testStatus) {
+    if (testStatus) {
       console.log(`Wykryto testStatus=${testStatus} w adresie URL`);
-      // Status testowy już jest w parametrach, nie dodajemy nic
+      searchParams.set('testStatus', testStatus);
     }
     // Jeśli przekazano status=FAILURE, dodajemy testStatus=FAILURE
     else if (status === 'FAILURE') {
       searchParams.set('testStatus', 'FAILURE');
       console.log('Dodano testStatus=FAILURE na podstawie status=FAILURE');
     }
+    // Jeśli mamy sukces, ustawiamy testStatus=SUCCESS
+    else if (status === 'SUCCESS') {
+      searchParams.set('testStatus', 'SUCCESS');
+      console.log('Dodano testStatus=SUCCESS na podstawie status=SUCCESS');
+    }
     // Jeśli nie ma statusu ani testStatus, ale jest ID_ZAMOWIENIA
     else if (!status && !testStatus && orderId) {
-      // Domyślnie nie dodajemy nic, obsługa po stronie React
-      console.log('Brak status i testStatus, React obsłuży odzyskiwanie sesji');
+      // Dla trybu testowego dodajemy domyślnie testStatus=SUCCESS
+      searchParams.set('testStatus', 'SUCCESS');
+      console.log('Brak status i testStatus, zakładam testStatus=SUCCESS');
     }
 
     // Używamy stałego URL dla przekierowania

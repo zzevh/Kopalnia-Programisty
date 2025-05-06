@@ -3,6 +3,12 @@ import { generateSecureDownloadUrl } from '../utils/cloudinary';
 import CryptoJS from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
 
+// Klucz szyfrowania dla danych sesji płatności
+const ENCRYPTION_KEY = config.hotpay.notificationPassword;
+
+// Sesja płatności ma klucz oparty na ID zamówienia
+const PAYMENT_SESSION_PREFIX = 'payment_';
+
 /**
  * Klasa serwisu obsługującego płatności - wersja produkcyjna
  */
@@ -12,7 +18,7 @@ class PaymentService {
    * @returns {string} - unikalny ID zamówienia
    */
   generateOrderId() {
-    return `KP_${Date.now()}_${uuidv4().substring(0, 8)}`;
+    return `KP_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
   }
 
   /**
@@ -30,27 +36,36 @@ class PaymentService {
     // Generowanie ID zamówienia
     const orderId = this.generateOrderId();
 
+    // Mapowanie nazwy produktu na ID
+    const productIdMap = {
+      'Kopalnia Złota': 'gold_mine',
+      'Kopalnia Diamentów': 'diamond_mine'
+    };
+
     // Szyfrowanie danych transakcji dla bezpieczeństwa
     const orderData = {
-      product,
+      orderId,
+      productId: productIdMap[product] || 'unknown_product',
+      productName: product,
       price,
       email,
       personName,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      status: 'PENDING'
     };
 
     // Zapisywanie zaszyfrowanych danych zamówienia
     const orderDataStr = JSON.stringify(orderData);
     const encryptedData = CryptoJS.AES.encrypt(
       orderDataStr,
-      config.hotpay.notificationPassword
+      ENCRYPTION_KEY
     ).toString();
 
     // Zapisujemy zaszyfrowane dane w sessionStorage
-    sessionStorage.setItem(`payment_${orderId}`, encryptedData);
+    localStorage.setItem(PAYMENT_SESSION_PREFIX + orderId, encryptedData);
 
     // Zapisujemy również ID ostatniego zamówienia, aby można było je odzyskać
-    sessionStorage.setItem('lastOrderId', orderId);
+    localStorage.setItem('lastOrderId', orderId);
 
     console.log('Generowanie danych formularza dla zamówienia:', orderId);
     console.log('URL powrotu:', config.hotpay.returnUrl);
@@ -110,13 +125,13 @@ class PaymentService {
    */
   getOrderData(orderId) {
     try {
-      const encryptedData = sessionStorage.getItem(`payment_${orderId}`);
+      const encryptedData = localStorage.getItem(PAYMENT_SESSION_PREFIX + orderId);
       if (!encryptedData) return null;
 
       // Odszyfrowanie danych
       const decryptedBytes = CryptoJS.AES.decrypt(
         encryptedData,
-        config.hotpay.notificationPassword
+        ENCRYPTION_KEY
       );
 
       // Konwersja do tekstu, a następnie do obiektu
@@ -188,7 +203,7 @@ class PaymentService {
       // Szyfrowanie danych transakcji przed zapisaniem
       const encryptedData = CryptoJS.AES.encrypt(
         JSON.stringify(transaction),
-        config.hotpay.notificationPassword
+        ENCRYPTION_KEY
       ).toString();
 
       // Zapisywanie w localStorage (w produkcji używalibyśmy bazy danych)
@@ -223,7 +238,7 @@ class PaymentService {
       // Odszyfrowanie danych
       const decryptedBytes = CryptoJS.AES.decrypt(
         encryptedData,
-        config.hotpay.notificationPassword
+        ENCRYPTION_KEY
       );
 
       // Konwersja do tekstu, a następnie do obiektu
@@ -258,4 +273,187 @@ class PaymentService {
   }
 }
 
-export default new PaymentService(); 
+const paymentService = new PaymentService();
+
+/**
+ * Pobiera sesję płatności
+ * @returns {Object|null} - dane sesji płatności lub null
+ */
+export function getPaymentSession() {
+  try {
+    // Pobieramy ostatnie ID zamówienia
+    const lastOrderId = localStorage.getItem('lastOrderId');
+
+    if (!lastOrderId) {
+      console.log('Brak zapisanego ID zamówienia');
+      return findLatestPaymentSession();
+    }
+
+    // Pobieramy zaszyfrowane dane
+    const encryptedData = localStorage.getItem(PAYMENT_SESSION_PREFIX + lastOrderId);
+
+    if (!encryptedData) {
+      console.log('Brak danych sesji dla ID:', lastOrderId);
+      return findLatestPaymentSession();
+    }
+
+    // Deszyfrujemy dane
+    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    const sessionData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+    console.log('Pobrano sesję płatności:', lastOrderId);
+    return sessionData;
+  } catch (error) {
+    console.error('Błąd podczas pobierania sesji płatności:', error);
+    return null;
+  }
+}
+
+/**
+ * Znajduje najnowszą sesję płatności
+ * @returns {Object|null} - dane sesji płatności lub null
+ */
+function findLatestPaymentSession() {
+  try {
+    let latestTimestamp = 0;
+    let latestSession = null;
+
+    // Przeszukujemy wszystkie klucze w localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+
+      if (key.startsWith(PAYMENT_SESSION_PREFIX)) {
+        try {
+          const encryptedData = localStorage.getItem(key);
+          const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+          const sessionData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+          if (sessionData.timestamp > latestTimestamp) {
+            latestTimestamp = sessionData.timestamp;
+            latestSession = sessionData;
+          }
+        } catch (e) {
+          // Ignorujemy błędne wpisy
+        }
+      }
+    }
+
+    if (latestSession) {
+      console.log('Znaleziono najnowszą sesję płatności:', latestSession.orderId);
+    } else {
+      console.log('Nie znaleziono żadnej sesji płatności');
+    }
+
+    return latestSession;
+  } catch (error) {
+    console.error('Błąd podczas wyszukiwania sesji płatności:', error);
+    return null;
+  }
+}
+
+/**
+ * Czyści sesję płatności
+ */
+export function clearPaymentSession() {
+  try {
+    const lastOrderId = localStorage.getItem('lastOrderId');
+
+    if (lastOrderId) {
+      localStorage.removeItem(PAYMENT_SESSION_PREFIX + lastOrderId);
+      localStorage.removeItem('lastOrderId');
+    }
+
+    console.log('Wyczyszczono sesję płatności');
+    return true;
+  } catch (error) {
+    console.error('Błąd podczas czyszczenia sesji płatności:', error);
+    return false;
+  }
+}
+
+/**
+ * Aktualizuje status płatności
+ * @param {string} orderId - ID zamówienia
+ * @param {string} status - nowy status
+ * @returns {boolean} - true jeśli aktualizacja się powiodła
+ */
+export function updatePaymentStatus(orderId, status) {
+  try {
+    if (!orderId) {
+      console.error('Brak ID zamówienia');
+      return false;
+    }
+
+    const key = PAYMENT_SESSION_PREFIX + orderId;
+    const encryptedData = localStorage.getItem(key);
+
+    if (!encryptedData) {
+      console.error('Nie znaleziono sesji płatności dla ID:', orderId);
+      return false;
+    }
+
+    // Deszyfrowanie
+    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    const sessionData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+
+    // Aktualizacja statusu
+    sessionData.status = status;
+    sessionData.lastUpdated = Date.now();
+
+    // Ponowne szyfrowanie i zapis
+    const updatedEncryptedData = CryptoJS.AES.encrypt(
+      JSON.stringify(sessionData),
+      ENCRYPTION_KEY
+    ).toString();
+
+    localStorage.setItem(key, updatedEncryptedData);
+
+    console.log(`Zaktualizowano status płatności dla ${orderId} na ${status}`);
+    return true;
+  } catch (error) {
+    console.error('Błąd podczas aktualizacji statusu płatności:', error);
+    return false;
+  }
+}
+
+/**
+ * Generuje URL do pobrania pliku
+ * @param {string} productId - ID produktu
+ * @returns {Promise<string>} - URL do pobrania
+ */
+export async function getDownloadUrl(productId) {
+  try {
+    if (!productId) {
+      throw new Error('Brak ID produktu');
+    }
+
+    // Produkty i ich odpowiedniki w Cloudinary
+    const productMap = {
+      'gold_mine': {
+        publicId: config.downloads.urls.goldMine,
+        expiryHours: config.downloads.goldValidityHours
+      },
+      'diamond_mine': {
+        publicId: config.downloads.urls.diamondMine,
+        expiryHours: config.downloads.diamondValidityDays * 24
+      }
+    };
+
+    const product = productMap[productId];
+
+    if (!product) {
+      throw new Error(`Nieznany produkt: ${productId}`);
+    }
+
+    // Generowanie bezpiecznego URL przez cloudinary
+    const downloadUrl = generateSecureDownloadUrl(product.publicId, product.expiryHours);
+
+    console.log(`Wygenerowano URL do pobrania dla produktu ${productId}`);
+    return downloadUrl;
+  } catch (error) {
+    console.error('Błąd podczas generowania URL do pobrania:', error);
+    throw error;
+  }
+}
+
+export default paymentService; 
