@@ -508,7 +508,11 @@ export async function getDownloadUrl(productId) {
  * @returns {string} - Hasło do pliku ZIP
  */
 export function getFilePassword(productId) {
-  // Stałe hasło do wszystkich plików ZIP
+  // Różne hasła dla różnych produktów
+  if (productId === 'diamond_mine') {
+    return "KP_AmDbX";
+  }
+  // Dla Kopalni Złota i wszystkich innych produktów
   return "KP_Tn4s";
 }
 

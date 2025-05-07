@@ -98,7 +98,11 @@ export function generateUniqueToken() {
  * @returns {string} - Hasło do pliku ZIP
  */
 export function getZipPassword(productId) {
-  // Stałe hasło do wszystkich plików ZIP zgodnie z wymaganiami
+  // Różne hasła dla różnych produktów
+  if (productId === 'diamond_mine' || productId.includes('diament')) {
+    return "KP_AmDbX";
+  }
+  // Dla Kopalni Złota i wszystkich innych produktów
   return "KP_Tn4s";
 }
 
