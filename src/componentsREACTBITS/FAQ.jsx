@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 const questions = [
   {
     q: 'Jak długo będę mieć dostęp do kursu?',
-    a: 'To zależy od pakietu, który wybierzesz. W wersji "Kopalnia Złota" masz dostęp 24/7 przez rok, a w "Kopalni Diamentów" – 24/7 na zawsze. W obu przypadkach możesz korzystać z kursu wtedy, kiedy chcesz, bez stresu i pośpiechu.',
+    a: 'Dostęp do kursu masz zawsze 24/7 i na zawsze. Pamiętaj jednak, że dostęp do pobrania pliku może się różnić w zależności od wybranego kursu. W przypadku "Kopalni Złota" link do pobrania może wygasnąć po roku, natomiast w przypadku "Kopalni Diamentów" link jest trwały i nie powinien wygasać. W obu przypadkach możesz korzystać z kursu wtedy, kiedy chcesz, bez stresu i pośpiechu.',
   },
   {
     q: 'Czy mogę się z Tobą skontaktować? (Przed zakupem też??)',
-    a: 'Oczywiście! Niezależnie od tego, czy kupiłeś kurs, czy dopiero się zastanawiasz, możesz śmiało pisać. Instagram, Discord, mail – wszystko znajdziesz w zakładce Kontakt. Odpisuję zawsze, jak tylko mogę!',
+    a: 'Oczywiście! Niezależnie od tego, czy kupiłeś kurs, czy dopiero się zastanawiasz, możesz śmiało pisać. Wszystko znajdziesz w zakładce Kontakt. Odpisuję zawsze, jak tylko mogę!',
   },
   {
     q: 'Czy dostanę fakturę?',
@@ -19,7 +19,7 @@ const questions = [
   },
   {
     q: 'Czy mogę robić kurs w swoim tempie?',
-    a: 'Pewnie, że tak! Wszystko jest uporządkowane tak, żebyś mógł iść krok po kroku, bez presji. Nie ma limitów czasowych – jedyne ograniczenie to czas dostępu do plików: rok lub na zawsze, zależnie od pakietu, który wybierzesz.',
+    a: 'Pewnie, że tak! Wszystko jest uporządkowane tak, żebyś mógł iść krok po kroku, bez presji. Nie ma limitów czasowych, jedyne ograniczenie to czas pobrania plików: rok lub na zawsze, zależnie od pakietu, który wybierzesz.',
   },
   {
     q: 'Czy kurs jest trudny?',
@@ -27,7 +27,7 @@ const questions = [
   },
   {
     q: 'Czy będę potrzebować jakiegoś oprogramowania?',
-    a: 'Nie musisz nic instalować na start. Jeśli w dalszej części kursu będą potrzebne jakieś narzędzia, pokażę Ci dokładnie co, po co i jak ich używać. Wszystko będzie wytłumaczone po ludzku.',
+    a: 'Wystarczy, że Twój komputer będzie w stanie rozpakować plik .zip – a to potrafi praktycznie każdy system operacyjny, więc nie musisz się tym martwić. Dodatkowo, do wygodniejszego przeglądania materiałów może przydać się Figma – to darmowe narzędzie online, które działa w przeglądarce i nie wymaga instalacji. Jeśli w dalszej części kursu pojawią się jakieś dodatkowe narzędzia, dokładnie pokażę Ci co to za narzędzia, po co są potrzebne i jak ich używać. Wszystko będzie wyjaśnione prosto i zrozumiale – bez zbędnego technicznego żargonu.',
   },
 ];
 

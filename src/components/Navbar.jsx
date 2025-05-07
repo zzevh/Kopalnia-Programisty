@@ -18,6 +18,9 @@ const Navbar = () => {
           <a href="#przewaga" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Twoja przewaga
           </a>
+          <a href="#podglad" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+            Podgląd kursu
+          </a>
           <a href="/allproducts" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Zobacz kursy z programowania
           </a>
@@ -42,14 +45,17 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden mt-2 py-3 px-4 bg-[#1f1c16] rounded-lg">
           <div className="flex flex-col space-y-4">
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+            <a href="#warto" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
               Dlaczego warto
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+            <a href="#przewaga" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
               Twoja przewaga
             </a>
-            <a href="#" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
-              Zobacz kursy z porgramowania
+            <a href="#podglad" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+              Podgląd kursu
+            </a>
+            <a href="/allproducts" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
+              Zobacz kursy z programowania
             </a>
             <a
               href="#"

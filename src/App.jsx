@@ -17,7 +17,6 @@ import r9 from './assets/opinie/9.png'
 import r10 from './assets/opinie/10.png'
 
 
-
 const App = () => {
   const [acceptGold, setAcceptGold] = useState(false);
   const [acceptDiamond, setAcceptDiamond] = useState(false);
@@ -424,7 +423,7 @@ const App = () => {
 
               <div className="bg-[#50402B] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
                 <h3 className="text-2xl font-bold text-[#FFE8BE] font-syne mb-4 text-center">Kopalnia Złota</h3>
-                <div className="text-5xl font-extrabold text-[#FFE8BE] mb-6 font-syne text-center">1 <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
+                <div className="text-5xl font-extrabold text-[#FFE8BE] mb-6 font-syne text-center">79 <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-3">
@@ -443,6 +442,14 @@ const App = () => {
                       </svg>
                     </div>
                     <span className="text-[#DFD2B9] -ml-2">Praktyczne poradniki, gotowe linki i instrukcje krok po kroku.</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-[#FFBD33] rounded-full flex items-center justify-center mr-4 shrink-0">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </div>
+                    <span className="text-[#DFD2B9] -ml-2">Jeden zaawansowany i rozbudowany projekt w Figma</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-[#FFBD33] rounded-full flex items-center justify-center mr-4 shrink-0">
@@ -508,7 +515,7 @@ const App = () => {
 
               <div className="bg-[#1E64D1] rounded-xl p-8 border border-[#FFE8BE]/20 flex flex-col h-full">
                 <h3 className="text-2xl font-bold text-white font-syne mb-4 text-center">Kopalnia Diamentów</h3>
-                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">1  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
+                <div className="text-5xl font-extrabold text-white mb-6 text-center font-syne">129  <br /> <span className="text-base font-normal font-inter text-[#D5D5D5]">PLN BRUTTO</span></div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center gap-3">
@@ -526,6 +533,14 @@ const App = () => {
                       </svg>
                     </div>
                     <span className="text-white -ml-2">Stały dostęp do zamkniętej grupy Discord</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-[#0597ff] rounded-full flex items-center justify-center mr-4 shrink-0">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    </div>
+                    <span className="text-white -ml-2">3 Zaawansowane i rozbudowane projekty w Figma</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-[#0597ff] rounded-full flex items-center justify-center mr-4 shrink-0">
@@ -604,6 +619,97 @@ const App = () => {
               </p>
               <a href="/allproducts" className="block w-full md:w-[100%] mx-auto bg-[#3A332A] hover:bg-[#50402B] text-[#DFD2B9] text-center font-medium py-3 rounded-full transition-colors text-base md:text-lg">
                 Zobacz inne kursy i poradniki
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section id='podglad' className="max-w-7xl mx-auto px-6 mt-24 mb-24">
+          <div className="bg-[#34240F] rounded-2xl p-6 md:p-10 border-[#6b4a2d] border">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white font-syne mb-4 text-center">
+              Podgląd kursu
+            </h2>
+            <p className="text-[#9F9A92] text-center mb-12 max-w-3xl mx-auto">
+              Sprawdź, co dokładnie otrzymasz w każdym pakiecie. <br /> Poniżej znajdziesz szczegółowy opis zawartości kursów.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Kopalnia Złota */}
+              <div className="bg-[#50402B] rounded-xl p-8 border border-[#FFE8BE]/20">
+                <h3 className="text-2xl font-bold text-[#FFE8BE] font-syne mb-6 text-center">Kopalnia Złota - zawartość</h3>
+
+
+
+                <div className="space-y-4 mb-8">
+                  <div className="bg-[#3A2E1C] p-4 rounded-lg">
+                    <h4 className="text-[#D5A44A] font-semibold mb-2 text-lg">Struktura folderu:</h4>
+                    <p className="text-[#DFD2B9] mb-2">W jednym folderze znajdują się 3 pliki:</p>
+                    <ul className="list-disc pl-5 text-[#DFD2B9] space-y-1">
+                      <li>1 × plik Markdown (.md)</li>
+                      <li>1 × plik PDF</li>
+                      <li>1 × plik Figma (JAM)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-[#3A2E1C] p-4 rounded-lg">
+                    <h4 className="text-[#D5A44A] font-semibold mb-2 text-lg">Zawartość:</h4>
+                    <ul className="list-disc pl-5 text-[#DFD2B9] space-y-2">
+                      <li>Plik do kontaktu</li>
+                      <li>Zaawansowany plik kursu PDF z 6 stronami (w tym 5 modułów, w tym około 20 "podtematów"!)</li>
+                      <li>Zaawansowany plik kursu Figma (JAM) zawierający jeden kompletny lejek</li>
+                    </ul>
+                  </div>
+
+
+                </div>
+              </div>
+
+              {/* Kopalnia Diamentów */}
+              <div className="bg-[#1c2e50] rounded-xl p-8 border border-[#C4D7F5]/20">
+                <h3 className="text-2xl font-bold text-white font-syne mb-6 text-center">Kopalnia Diamentów - zawartość</h3>
+
+
+
+                <div className="space-y-4 mb-8">
+                  <div className="bg-[#15233d] p-4 rounded-lg">
+                    <h4 className="text-[#3a8eff] font-semibold mb-2 text-lg">Struktura folderu:</h4>
+                    <p className="text-white mb-2">W jednym folderze znajduje się 6 plików:</p>
+                    <ul className="list-disc pl-5 text-white space-y-1">
+                      <li>2 × pliki Markdown (.md)</li>
+                      <li>1 × plik PDF</li>
+                      <li>3 × pliki Figma (JAM)</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-[#15233d] p-4 rounded-lg">
+                    <h4 className="text-[#3a8eff] font-semibold mb-2 text-lg">Zawartość:</h4>
+                    <ul className="list-disc pl-5 text-white space-y-2">
+                      <li>Plik do kontaktu</li>
+                      <li>Plik z dostępem do zamkniętej grupy Discord</li>
+                      <li>Zaawansowany plik kursu PDF z 8 stronami (w tym 7 modułów, w tym około 26 "podtematów")</li>
+                      <li>Zaawansowane pliki kursu Figma (JAM) zawierające:
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                          <li>Kompletny lejek</li>
+                          <li>3 × Case-study</li>
+                          <li>2 × szablony informacji o sobie</li>
+                          <li>Tipy od Figma</li>
+                          <li>Szablony spotkań (meeting info, topic, next steps)</li>
+                          <li>Przeszłe spotkania (past meeting, meeting info, topic, next steps)</li>
+                          <li>System zarządzania zadaniami (todo, in progress, in review, completed, backlog)</li>
+                        </ul>
+                      </li>
+                      <li>FIGALL - wszystkie pliki Figma w jednym!</li>
+                    </ul>
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 text-center">
+              <a href="#kurs" className="inline-block bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg">
+                Wybierz swój pakiet
               </a>
             </div>
           </div>

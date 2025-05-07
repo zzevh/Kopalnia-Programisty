@@ -11,6 +11,7 @@ const Kontakt = () => {
             <li><b>Email:</b> <a href="mailto:aureotradecompany@gmail.com" className="text-[#FFE8BE] underline">aureotradecompany@gmail.com</a></li>
           </ul>
           <p className="mt-6">Odpowiadam najszybciej jak mogę! 🚀</p>
+          <p className='text-sm text-[#9D9D9D] mt-2'>*Oczywiście, możesz również napisać do mnie bezpośrednio na Discordzie – jeśli jesteś członkiem zamkniętego serwera.</p>
         </div>
       </div>
     </div>

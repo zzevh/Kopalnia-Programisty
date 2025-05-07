@@ -191,17 +191,11 @@ export default function PaymentCallback() {
                 </ol>
               </div>
 
-              <p className="text-sm text-[#DFD2B9] opacity-80 mt-4">
-                {productName.includes('Złota')
-                  ? "Link będzie aktywny przez 24 godziny. Zapisz go lub pobierz materiały od razu."
-                  : "Link będzie aktywny bezterminowo. Zapisz go w bezpiecznym miejscu."}
-              </p>
+
 
               <div className="mt-4 bg-[#342A1E] p-3 rounded-lg border border-[#D5A44A]/20">
                 <p className="text-xs text-[#DFD2B9] opacity-90">
-                  <span className="text-[#D5A44A] font-medium">Uwaga:</span> Jeśli masz problem z pobraniem,
-                  napisz do nas na <a href="mailto:kontakt@kopalniaprogramisty.pl" className="text-[#D5A44A] underline">kontakt@kopalniaprogramisty.pl</a>,
-                  a prześlemy Ci plik bezpośrednio.
+                  <span className="text-[#D5A44A] font-medium">Uwaga:</span> Zachowaj numer zamówienia! Może być on wymagany, aby dołączyć do zamkniętego serwera Discord (dotyczy wyłącznie osób, które zakupiły "Kopanie Diamentów").
                 </p>
               </div>
             </div>
@@ -225,7 +219,7 @@ export default function PaymentCallback() {
               Wróć na stronę główną
             </button>
             <a
-              href="mailto:kontakt@kopalniaprogramisty.pl"
+              href="mailto:aureotradecompany@gmail.com"
               className="inline-block bg-transparent border border-[#9F9A92] hover:bg-[#9F9A92]/10 text-[#9F9A92] font-medium px-6 py-2 rounded-full transition-colors text-base"
             >
               Potrzebujesz pomocy?
@@ -263,7 +257,7 @@ export default function PaymentCallback() {
             Spróbuj ponownie
           </button>
           <a
-            href="mailto:kontakt@kopalniaprogramisty.pl"
+            href="mailto:aureotradecompany@gmail.com"
             className="inline-block bg-transparent border border-[#D5A44A] hover:bg-[#D5A44A]/10 text-[#D5A44A] font-medium px-8 py-3 rounded-full transition-colors text-lg"
           >
             Kontakt z obsługą
@@ -273,8 +267,8 @@ export default function PaymentCallback() {
         <div className="text-sm text-[#DFD2B9] opacity-80 mt-8">
           <p>
             Jeśli problem występuje nadal, skontaktuj się z nami pod adresem{' '}
-            <a href="mailto:kontakt@kopalniaprogramisty.pl" className="text-[#D5A44A] hover:underline">
-              kontakt@kopalniaprogramisty.pl
+            <a href="mailto:aureotradecompany@gmail.com" className="text-[#D5A44A] hover:underline">
+              aureotradecompany@gmail.com
             </a>
           </p>
         </div>
