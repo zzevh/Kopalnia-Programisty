@@ -511,10 +511,10 @@ const App = () => {
                         setAcceptGold(e.target.checked);
                         if (e.target.checked) setGoldError(false);
                       }}
-                      className="w-4 h-4 mr-2 accent-[#D5A44A] mt-1"
+                      className="w-6 h-6 mr-2 accent-[#D5A44A] mt-0.5 cursor-pointer"
                       id="acceptGold"
                     />
-                    <label htmlFor="acceptGold" className="text-[#DFD2B9] text-xs leading-tight">
+                    <label htmlFor="acceptGold" className="text-[#DFD2B9] text-xs leading-tight cursor-pointer">
                       Zapoznałem/am się i akceptuję
                       <a href="/legals" className="inline-block mx-1 px-1 text-[#FFE8BE]">Regulamin</a>,
                       <a href="/legals" className="inline-block mx-1 px-1 text-[#FFE8BE]">Politykę Prywatności</a> oraz
@@ -610,10 +610,10 @@ const App = () => {
                         setAcceptDiamond(e.target.checked);
                         if (e.target.checked) setDiamondError(false);
                       }}
-                      className="w-4 h-4 mr-2 accent-[#1E64D1] mt-1"
+                      className="w-6 h-6 mr-2 accent-[#1E64D1] mt-0.5 cursor-pointer"
                       id="acceptDiamond"
                     />
-                    <label htmlFor="acceptDiamond" className="text-white text-xs leading-tight">
+                    <label htmlFor="acceptDiamond" className="text-white text-xs leading-tight cursor-pointer">
                       Zapoznałem/am się i akceptuję
                       <a href="/legals" className="inline-block mx-1 px-1 text-white">Regulamin</a>,
                       <a href="/legals" className="inline-block mx-1 px-1 text-white">Politykę Prywatności</a> oraz

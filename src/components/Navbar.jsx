@@ -52,7 +52,7 @@ const Navbar = () => {
               Zobacz kursy z programowania
             </a>
             <a
-              href="#"
+              href="#kurs"
               className="bg-[#D49C38] hover:bg-[#c69643] text-white font-semibold font-inter px-6 py-2 rounded-full text-center transition-colors"
             >
               Otwórz Kopalnię
