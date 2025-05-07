@@ -46,6 +46,21 @@ const App = () => {
         name: 'Kopalnia Złota',
         price: '79'
       }));
+
+      // TikTok Tracking Code - AddToCart event dla Kopalni Złota
+      if (window.ttq) {
+        window.ttq.track('AddToCart', {
+          content_id: 'kopalnia-zlota',
+          content_type: 'product',
+          content_name: 'Kopalnia Złota',
+          quantity: 1,
+          price: 79,
+          value: 79,
+          currency: 'PLN',
+          description: 'Kurs Kopalnia Złota',
+          content_ids: ['kopalnia-zlota']
+        });
+      }
     }
   };
 
@@ -66,6 +81,21 @@ const App = () => {
         name: 'Kopalnia Diamentów',
         price: '129'
       }));
+
+      // TikTok Tracking Code - AddToCart event dla Kopalni Diamentów
+      if (window.ttq) {
+        window.ttq.track('AddToCart', {
+          content_id: 'kopalnia-diamentow',
+          content_type: 'product',
+          content_name: 'Kopalnia Diamentów',
+          quantity: 1,
+          price: 129,
+          value: 129,
+          currency: 'PLN',
+          description: 'Kurs Kopalnia Diamentów',
+          content_ids: ['kopalnia-diamentow']
+        });
+      }
     }
   };
 
