@@ -175,15 +175,15 @@ const PaymentModal = ({ isOpen, onClose, product, price }) => {
                     className={`border ${paymentMethod === 'hotpay' ? 'border-[#FFE8BE]' : 'border-[#FFE8BE]/20'} rounded-lg p-3 cursor-pointer transition-all hover:border-[#FFE8BE]/50 text-center`}
                     onClick={() => setPaymentMethod('hotpay')}
                   >
-                    <div className="text-white font-medium">Blik/Przelewy/Karta</div>
+                    <div className="text-white font-medium">Blik/Przelewy/PayPal..</div>
                     <div className="text-[#D5A44A] text-xs mt-1">HotPay</div>
                   </div>
 
                   <div
                     className="border border-[#FFE8BE]/20 rounded-lg p-3 cursor-not-allowed bg-[#1A1814]/50 text-center opacity-50"
                   >
-                    <div className="text-white font-medium">PaySafeCard</div>
-                    <div className="text-[#D5A44A] text-xs mt-1">W weryfikacji</div>
+                    <div className="text-white font-medium">PaysafeCard</div>
+                    <div className="text-[#D5A44A] text-xs mt-1">Chwilowo niedostępna</div>
                   </div>
                 </div>
               </div>

@@ -15,6 +15,9 @@ import r7 from './assets/opinie/7.jpg'
 import r8 from './assets/opinie/8.png'
 import r9 from './assets/opinie/9.png'
 import r10 from './assets/opinie/10.png'
+import r11 from './assets/opinie/11.jpg'
+import r12 from './assets/opinie/12.jpg'
+import r13 from './assets/opinie/13.jpg'
 
 
 const App = () => {
@@ -34,14 +37,14 @@ const App = () => {
     } else {
       e.preventDefault();
       setSelectedProduct('Kopalnia Złota');
-      setProductPrice('1');
+      setProductPrice('79');
       setShowPaymentModal(true);
 
       // Zapisz informacje o produkcie do localStorage
       const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       localStorage.setItem(`product_${orderId}`, JSON.stringify({
         name: 'Kopalnia Złota',
-        price: '1'
+        price: '79'
       }));
     }
   };
@@ -54,14 +57,14 @@ const App = () => {
     } else {
       e.preventDefault();
       setSelectedProduct('Kopalnia Diamentów');
-      setProductPrice('1');
+      setProductPrice('129');
       setShowPaymentModal(true);
 
       // Zapisz informacje o produkcie do localStorage
       const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       localStorage.setItem(`product_${orderId}`, JSON.stringify({
         name: 'Kopalnia Diamentów',
-        price: '1'
+        price: '129'
       }));
     }
   };
@@ -115,7 +118,7 @@ const App = () => {
                 Zacznij od podstaw
               </h3>
               <p className="text-[#9F9A92]">
-                Tworzenie własnych projektów i budowanie czegoś na własnych zasadach jest prostsze, niż się wydaje.
+                Nauczysz się wszystkiego od zera, bez doświadczenia, bez znajomości kodu, bez technicznego zaplecza.
               </p>
             </div>
 
@@ -157,14 +160,14 @@ const App = () => {
                   <p>🚀</p>
                 </div>
                 <div className="pt-16 pb-4">
-                  <h3 className="text-xl font-semibold text-[#FFE8BE] mb-3 font-syne"> Zacznij działać od razu</h3>
+                  <h3 className="text-xl font-semibold text-[#FFE8BE] mb-3 font-syne"> Zaczynamy działać od razu</h3>
                   <p className="text-[#9F9A92]">Nie musisz kombinować. Dostajesz gotowy system, sprawdzone narzędzia i dokładne instrukcje krok po kroku.</p>
                 </div>
               </div>
 
               <div className="bg-[#50402B] rounded-xl p-6 border border-[#FFE8BE]/20 relative">
                 <div className="absolute top-6 left-6 w-10 h-10 rounded-full bg-[#432A17] border border-[#FFDAAA]/40 flex items-center justify-center">
-                  <p>🚀</p>
+                  <p>📈</p>
                 </div>
                 <div className="pt-16 pb-4">
                   <h3 className="text-xl font-semibold text-[#FFE8BE] mb-3 font-syne">Wszystko przetestowane i działa</h3>
@@ -366,7 +369,7 @@ const App = () => {
           </div>
         </section>
 
-        <section className="w-full mt-24 mb-24">
+        <section id='opinie' className="w-full mt-24 mb-24">
           <div className="bg-[#272420] p-10 relative">
             <h2 className="text-4xl md:text-5xl font-extrabold text-white font-syne text-center mb-4">
               Co sądzą inni?
@@ -394,7 +397,7 @@ const App = () => {
               </div>
 
               <div className="bg-[#23211E] rounded-xl overflow-hidden relative">
-                <img src={r9} alt="opinia" className="w-full" />
+                <img src={r12} alt="opinia" className="w-full" />
               </div>
               <div className="bg-[#23211E] rounded-xl overflow-hidden relative">
                 <img src={r8} alt="opinia" className="w-full" />
@@ -404,6 +407,15 @@ const App = () => {
               </div>
               <div className="border-[#23211E] border rounded-xl col-span-1 md:col-span-2 overflow-hidden relative">
                 <img src={r10} alt="opinia" className="w-full" />
+              </div>
+              <div className="bg-[#23211E] rounded-xl overflow-hidden relative">
+                <img src={r11} alt="opinia" className="w-full" />
+              </div>
+              <div className="bg-[#23211E] rounded-xl overflow-hidden relative">
+                <img src={r9} alt="opinia" className="w-full" />
+              </div>
+              <div className="bg-[#23211E] rounded-xl overflow-hidden relative">
+                <img src={r13} alt="opinia" className="w-full" />
               </div>
 
             </div>
@@ -708,9 +720,11 @@ const App = () => {
             </div>
 
             <div className="mt-10 text-center">
-              <a href="#kurs" className="inline-block bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg">
+              <a href="#kurs" className="inline-block mb-4 bg-[#D5A44A] hover:bg-[#c69643] text-white font-medium px-10 py-3 rounded-full transition-colors text-lg">
                 Wybierz swój pakiet
               </a>
+              <br />
+              <a className='text-gray-300 hover:text-gray-100 transition-all' href="#opinie">Sprawdz co sądzą inni i ich efekty!</a>
             </div>
           </div>
         </section>

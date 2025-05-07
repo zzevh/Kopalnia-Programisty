@@ -18,9 +18,6 @@ const Navbar = () => {
           <a href="#przewaga" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Twoja przewaga
           </a>
-          <a href="#podglad" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
-            Podgląd kursu
-          </a>
           <a href="/allproducts" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
             Zobacz kursy z programowania
           </a>
@@ -50,9 +47,6 @@ const Navbar = () => {
             </a>
             <a href="#przewaga" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
               Twoja przewaga
-            </a>
-            <a href="#podglad" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
-              Podgląd kursu
             </a>
             <a href="/allproducts" className="text-white hover:text-gray-300 transition-colors font-semibold font-inter">
               Zobacz kursy z programowania
