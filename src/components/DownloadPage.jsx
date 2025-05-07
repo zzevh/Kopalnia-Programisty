@@ -179,7 +179,8 @@ const DownloadPage = ({ product, orderId, downloadLink }) => {
           {/* Przycisk pobrania */}
           <motion.a
             href={secureLink}
-            download
+            target="_blank"
+            rel="noopener noreferrer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`w-full ${product.includes('Złota') ? 'bg-[#D5A44A] hover:bg-[#c69643]' : 'bg-[#1E64D1] hover:bg-[#1851ac]'} text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center`}

@@ -2,17 +2,17 @@ import { config } from '../config/env';
 import CryptoJS from 'crypto-js';
 
 /**
- * Generuje link do lokalnego pliku ZIP zabezpieczonego hasłem
+ * Generuje link do pliku ZIP na MediaFire
  * @param {string} publicId - identyfikator pliku (używany do określenia typu kursu)
- * @param {number} expiryTimeHours - czas ważności linku w godzinach (nieistotne dla lokalnych plików)
+ * @param {number} expiryTimeHours - czas ważności linku w godzinach (nieistotne dla zewnętrznych plików)
  * @returns {string} - URL do pobrania pliku
  */
 export function generateSecureDownloadUrl(publicId, expiryTimeHours = 24) {
   try {
-    // Lokalne ścieżki do plików ZIP zabezpieczonych hasłem
-    const LOCAL_FILES = {
-      "kopalnia-zlota": "/downloads/kopalnia-zlota.zip",
-      "kopalnia-diamentow": "/downloads/kopalnia-diamentow.zip",
+    // Linki do plików na MediaFire
+    const MEDIAFIRE_FILES = {
+      "kopalnia-zlota": "https://www.mediafire.com/file/q83i7qejqzncixi/Kopalnia-zlota.zip/file",
+      "kopalnia-diamentow": "https://www.mediafire.com/file/b06gazn9laemnih/Kopalnia-diamentow.zip/file",
     };
 
     // Określenie typu kursu
@@ -23,16 +23,16 @@ export function generateSecureDownloadUrl(publicId, expiryTimeHours = 24) {
     const expiresAt = Math.floor(Date.now() / 1000) + (expiryTimeHours * 3600);
     localStorage.setItem(`expiry_${publicId}`, expiresAt * 1000);
 
-    // Zwrócenie ścieżki do lokalnego pliku
-    console.log(`Generowanie linku do lokalnego pliku: ${type}`);
-    return LOCAL_FILES[type];
+    // Zwrócenie linku do pliku na MediaFire
+    console.log(`Generowanie linku do pliku na MediaFire: ${type}`);
+    return MEDIAFIRE_FILES[type];
   } catch (error) {
     console.error('Błąd podczas generowania linku do pobrania:', error);
 
     // Awaryjne linki
     return publicId.includes('zlota')
-      ? "/downloads/kopalnia-zlota.zip"
-      : "/downloads/kopalnia-diamentow.zip";
+      ? "https://www.mediafire.com/file/q83i7qejqzncixi/Kopalnia-zlota.zip/file"
+      : "https://www.mediafire.com/file/b06gazn9laemnih/Kopalnia-diamentow.zip/file";
   }
 }
 

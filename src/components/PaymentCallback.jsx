@@ -191,8 +191,6 @@ export default function PaymentCallback() {
                 </ol>
               </div>
 
-
-
               <div className="mt-4 bg-[#342A1E] p-3 rounded-lg border border-[#D5A44A]/20">
                 <p className="text-xs text-[#DFD2B9] opacity-90">
                   <span className="text-[#D5A44A] font-medium">Uwaga:</span> Zachowaj numer zamówienia! Może być on wymagany, aby dołączyć do zamkniętego serwera Discord (dotyczy wyłącznie osób, które zakupiły "Kopanie Diamentów").

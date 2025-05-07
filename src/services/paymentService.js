@@ -475,30 +475,30 @@ export async function getDownloadUrl(productId) {
 
     console.log('Generowanie URL pobrania dla produktu:', productId);
 
-    // Ścieżki do lokalnych plików ZIP zabezpieczonych hasłem
-    const LOCAL_FILES = {
-      'gold_mine': '/downloads/kopalnia-zlota.zip',
-      'diamond_mine': '/downloads/kopalnia-diamentow.zip',
+    // Linki do plików na MediaFire
+    const MEDIAFIRE_FILES = {
+      'gold_mine': 'https://www.mediafire.com/file/q83i7qejqzncixi/Kopalnia-zlota.zip/file',
+      'diamond_mine': 'https://www.mediafire.com/file/b06gazn9laemnih/Kopalnia-diamentow.zip/file',
     };
 
-    // Zwracamy ścieżkę do lokalnego pliku
-    if (LOCAL_FILES[productId]) {
-      console.log('Użycie lokalnego pliku dla produktu:', productId);
-      return LOCAL_FILES[productId];
+    // Zwracamy link do pliku na MediaFire
+    if (MEDIAFIRE_FILES[productId]) {
+      console.log('Użycie linku MediaFire dla produktu:', productId);
+      return MEDIAFIRE_FILES[productId];
     }
 
     // Dla bezpieczeństwa, jeśli ID produktu nie jest zdefiniowane w naszych stałych linkach
-    const publicId = productId === 'gold_mine' ? 'kopalnia-zlota' : 'kopalnia-diamentow';
-    console.log('Generowanie URL z publicId:', publicId);
-    return generateSecureDownloadUrl(publicId);
+    return productId.includes('gold') || productId.includes('zlota')
+      ? 'https://www.mediafire.com/file/q83i7qejqzncixi/Kopalnia-zlota.zip/file'
+      : 'https://www.mediafire.com/file/b06gazn9laemnih/Kopalnia-diamentow.zip/file';
 
   } catch (error) {
     console.error('Błąd podczas generowania URL do pobrania:', error);
 
     // Awaryjne linki w przypadku błędu
-    return productId.includes('gold')
-      ? '/downloads/kopalnia-zlota.zip'
-      : '/downloads/kopalnia-diamentow.zip';
+    return productId.includes('gold') || productId.includes('zlota')
+      ? 'https://www.mediafire.com/file/q83i7qejqzncixi/Kopalnia-zlota.zip/file'
+      : 'https://www.mediafire.com/file/b06gazn9laemnih/Kopalnia-diamentow.zip/file';
   }
 }
 
